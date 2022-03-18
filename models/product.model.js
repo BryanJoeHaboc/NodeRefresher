@@ -1,12 +1,17 @@
 const fs = require("fs");
 const path = require("path");
 const pathUtil = require("../util/path");
+const { v4 } = require("uuid");
 
 const p = path.join(pathUtil, "data", "products.json");
 
 module.exports = class Product {
-  constructor({ title }) {
+  constructor({ title, imageUrl, description, price, _id }) {
+    this._id = v4();
     this.title = title;
+    this.price = price;
+    this.imageUrl = imageUrl;
+    this.description = description;
   }
 
   save() {

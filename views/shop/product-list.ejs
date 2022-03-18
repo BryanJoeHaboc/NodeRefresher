@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <%- include('./includes/head.ejs') %>
+    <%- include('../includes/head.ejs') %>
     <!-- //href will be /public/main.css -->
     <link rel="stylesheet" href="/css/main.css" />
     <link rel="stylesheet" href="/css/product.css" />
   </head>
 
   <body>
-    <header class="main-header"><%- include('./includes/nav.ejs') %></header>
+    <header class="main-header"><%- include('../includes/nav.ejs') %></header>
 
     <main>
       <% if (prods.length > 0) { %>
@@ -19,10 +19,7 @@
             <h1 class="product__title"><%=product.title%></h1>
           </header>
           <div class="card__image">
-            <img
-              src="https://images.pexels.com/photos/762687/pexels-photo-762687.jpeg?auto=compress&cs=tinysrgb&dpr=2&w=500"
-              alt="Book"
-            />
+            <img src="<%=product.imageUrl%>" alt="Book" />
           </div>
           <div class="card__content">
             <h2 class="product__price"><%=product.price%></h2>
@@ -38,6 +35,6 @@
       <h1>No Products Available</h1>
       <% } %>
     </main>
-    <%- include('./includes/foot.ejs') %>
+    <%- include('../includes/foot.ejs') %>
   </body>
 </html>

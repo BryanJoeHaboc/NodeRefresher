@@ -1,1 +1,9 @@
-[{"title":"koko"},{"title":"koko"},{"title":"koko crunch"},{"title":"Phone"},{"title":"lol"},{"title":"minecraft"},{"title":"minecraft123"},{"title":"chaychay"}]
+[
+  {
+    "_id": "ef64efb3-3765-4605-ae27-70889c595da1",
+    "title": "Harry Potter and the Chamber of Secrets",
+    "price": "200",
+    "imageUrl": "https://images.pexels.com/photos/10025211/pexels-photo-10025211.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+    "description": "Harry Potter and the Chamber of Secrets "
+  }
+]
