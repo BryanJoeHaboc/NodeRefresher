@@ -4,8 +4,8 @@ const path = require("path");
 
 const bodyParser = require("body-parser");
 
-const { adminRoutes } = require("./routes/admin");
-const shopRoutes = require("./routes/shop");
+const { adminRoutes } = require("./routes/admin.routes");
+const shopRoutes = require("./routes/shop.routes");
 const { get404Page } = require("./controllers/error.controller");
 
 const app = express();
