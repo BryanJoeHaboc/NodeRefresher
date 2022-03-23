@@ -12,7 +12,9 @@ router.get("/add-product", getAddProductPage);
 
 router.post("/add-product", postAddProductPage);
 
-router.get("/products", getProductsAdminPage);
+router.get("/product-admin", getProductsAdminPage);
+
+router.get("/product-admin", getProductsAdminPage);
 
 module.exports = {
   adminRoutes: router,

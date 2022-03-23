@@ -20,10 +20,10 @@ exports.getProductsAdminPage = (req, res) => {
   const products = Product.fetchAll();
 
   products.then((products) => {
-    res.render("shop/product-list", {
+    res.render("admin/product-admin", {
       prods: products,
       pageTitle: "Shop",
-      path: "/admin/products",
+      path: "/admin/product-admin",
       hasProducts: products.length > 0,
       activeShop: true,
       productCSS: true,
