@@ -74,12 +74,12 @@ module.exports = class Product {
 
       allProducts.then((products) => {
         const newProductLists = products.filter(
-          (product) => product._id !== id
+          (product) => product._id !== id.trim()
         );
 
-        const deletedProduct = products.find((product) => product._id === id);
-
-        console.log(deletedProduct);
+        const deletedProduct = products.find(
+          (product) => product._id === id.trim()
+        );
 
         fs.writeFile(p, JSON.stringify(newProductLists), (err) => {
           if (err) {

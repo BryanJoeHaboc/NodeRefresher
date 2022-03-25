@@ -38,22 +38,40 @@ module.exports = class Cart {
   }
 
   static deleteProduct(id, productPrice) {
-    let cart;
-    fs.readFile(p, (err, fileContent) => {
-      if (err) {
-        return;
-      }
-      cart = JSON.parse(fileContent);
-      const updatedCart = { ...cart };
-      const product = updatedCart.products.find((prod) => prod._id === id);
-      updatedCart.products = updatedCart.products.filter(
-        (prod) => prod._id !== id
-      );
-      console.log("totalPrice", updatedCart.totalPrice, productPrice, product);
-      updatedCart.totalPrice =
-        updatedCart.totalPrice - productPrice * product.qty;
+    return new Promise((res, rej) => {
+      fs.readFile(p, (err, fileContent) => {
+        if (err) {
+          return;
+        }
+        const cart = JSON.parse(fileContent);
+        const updatedCart = { ...cart };
+        const product = updatedCart.products.find((prod) => prod._id === id);
+        updatedCart.products = updatedCart.products.filter(
+          (prod) => prod._id !== id
+        );
 
-      fs.writeFile(p, JSON.stringify(updatedCart), (err) => console.log(err));
+        if (!product) {
+          return;
+        }
+
+        updatedCart.totalPrice =
+          updatedCart.totalPrice - productPrice * product.qty;
+
+        res(
+          fs.writeFile(p, JSON.stringify(updatedCart), (err) =>
+            console.log(err)
+          )
+        );
+      });
+    });
+  }
+
+  static getProducts() {
+    return new Promise((res, rej) => {
+      fs.readFile(p, (err, fileContent) => {
+        if (err) rej(err);
+        else res(JSON.parse(fileContent));
+      });
     });
   }
 };
