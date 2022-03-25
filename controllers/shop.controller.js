@@ -3,15 +3,15 @@ const Product = require("../models/product.model");
 const Cart = require("../models/cart.model");
 
 exports.getProductsPage = (req, res) => {
-  const products = Product.fetchAll();
-
-  products.then((products) => {
-    res.render("shop/product-list", {
-      prods: products,
-      pageTitle: "All Products",
-      path: "/products",
-    });
-  });
+  Product.fetchAll()
+    .then(([rows, fieldData]) => {
+      res.render("shop/product-list", {
+        prods: rows,
+        pageTitle: "All Products",
+        path: "/products",
+      });
+    })
+    .catch((err) => console.log(err));
 };
 
 exports.getIndexPage = (req, res) => {
@@ -70,14 +70,17 @@ exports.getOrderPage = (req, res) => {
   res.render("shop/orders", { pageTitle: "My Cart", path: "/cart" });
 };
 
-exports.getProductPage = async (req, res) => {
+exports.getProductPage = (req, res) => {
   const productId = req.params.productId;
-  const product = await Product.findById(productId);
-  res.render("shop/product-item", {
-    pageTitle: product[0].title,
-    product: product[0],
-    path: "/products",
-  });
+  Product.findById(productId)
+    .then(([product]) => {
+      res.render("shop/product-item", {
+        pageTitle: product[0].title,
+        product: product[0],
+        path: "/products",
+      });
+    })
+    .catch((err) => console.log(err));
 };
 
 exports.postCartDeleteProduct = async (req, res, next) => {

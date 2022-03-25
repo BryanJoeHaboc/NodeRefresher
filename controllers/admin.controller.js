@@ -1,3 +1,4 @@
+const { redirect } = require("express/lib/response");
 const Product = require("../models/product.model");
 
 exports.getAddProductPage = (req, res, next) => {
@@ -53,8 +54,10 @@ exports.getEditProductPage = async (req, res, next) => {
 exports.postAddProductPage = (req, res) => {
   req.body._id = null;
   const product = new Product(req.body);
-  product.save();
-  res.redirect("/");
+  product
+    .save()
+    .then(() => res.redirect("/"))
+    .catch((err) => console.log(err));
 };
 
 exports.getProductsAdminPage = (req, res) => {
