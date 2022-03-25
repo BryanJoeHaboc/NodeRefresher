@@ -15,15 +15,15 @@ exports.getProductsPage = (req, res) => {
 };
 
 exports.getIndexPage = (req, res) => {
-  const products = Product.fetchAll();
-
-  products.then((products) => {
-    res.render("shop/product-list", {
-      prods: products,
-      pageTitle: "Shop",
-      path: "/",
-    });
-  });
+  Product.fetchAll()
+    .then(([rows, fieldData]) => {
+      res.render("shop/product-list", {
+        prods: rows,
+        pageTitle: "Shop",
+        path: "/",
+      });
+    })
+    .catch((err) => console.log(err));
 };
 
 exports.getCartPage = async (req, res) => {
