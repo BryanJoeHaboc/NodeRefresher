@@ -3,6 +3,11 @@ const express = require("express");
 const path = require("path");
 
 const bodyParser = require("body-parser");
+const Sequelize = require("sequelize");
+
+const sequelize = require("./util/database");
+const Product = require("./models/product.model");
+const User = require("./models/user");
 
 const { adminRoutes } = require("./routes/admin.routes");
 const shopRoutes = require("./routes/shop.routes");
@@ -18,6 +23,15 @@ app.use(bodyParser.urlencoded({ extended: false }));
 // NOTE: makes static files usable
 app.use(express.static(path.join(__dirname, "public")));
 
+app.use((req, res, next) => {
+  User.findByPk(1)
+    .then((user) => {
+      req.user = user;
+      next();
+    })
+    .catch((err) => console.log(err));
+});
+
 app.use("/admin", adminRoutes);
 app.use(shopRoutes);
 
@@ -25,6 +39,26 @@ app.use(get404Page);
 
 const port = 5000;
 
-app.listen(port, () => {
-  console.log(`Listening on port ${port}`);
-});
+Product.belongsTo(User, { constraints: true, onDelete: "CASCADE" });
+User.hasMany(Product);
+
+sequelize
+  .sync()
+  .then((res) => {
+    // console.log(res);
+    return User.findByPk(1);
+  })
+  .then((user) => {
+    if (!user) {
+      return User.create({ displayName: "Max", email: "test@test.com" });
+    }
+
+    return Promise.resolve(user);
+  })
+  .then((user) => {
+    // console.log(user);
+    app.listen(port, () => {
+      console.log(`Listening on port ${port}`);
+    });
+  })
+  .catch((err) => console.log(err));

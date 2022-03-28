@@ -1,12 +1,11 @@
-const req = require("express/lib/request");
 const Product = require("../models/product.model");
 const Cart = require("../models/cart.model");
 
 exports.getProductsPage = (req, res) => {
-  Product.fetchAll()
-    .then(([rows, fieldData]) => {
+  Product.findAll()
+    .then((products) => {
       res.render("shop/product-list", {
-        prods: rows,
+        prods: products,
         pageTitle: "All Products",
         path: "/products",
       });
@@ -15,10 +14,10 @@ exports.getProductsPage = (req, res) => {
 };
 
 exports.getIndexPage = (req, res) => {
-  Product.fetchAll()
-    .then(([rows, fieldData]) => {
+  Product.findAll()
+    .then((products) => {
       res.render("shop/product-list", {
-        prods: rows,
+        prods: products,
         pageTitle: "Shop",
         path: "/",
       });
@@ -30,7 +29,7 @@ exports.getCartPage = async (req, res) => {
   const cart = await Cart.getProducts();
 
   if (cart) {
-    const products = await Product.fetchAll();
+    const products = await Product.findAll();
     const cartProducts = [];
 
     for (const product of products) {
@@ -72,11 +71,12 @@ exports.getOrderPage = (req, res) => {
 
 exports.getProductPage = (req, res) => {
   const productId = req.params.productId;
-  Product.findById(productId)
-    .then(([product]) => {
+  console.log("productId", productId);
+  Product.findByPk(productId)
+    .then((product) => {
       res.render("shop/product-item", {
-        pageTitle: product[0].title,
-        product: product[0],
+        pageTitle: product.title,
+        product: product,
         path: "/products",
       });
     })
@@ -90,6 +90,6 @@ exports.postCartDeleteProduct = async (req, res, next) => {
   product.then((prod) => {
     const deletedCartItem = Cart.deleteProduct(prodId.trim(), prod[0].price);
 
-    deletedCartItem.then((item) => res.redirect("/"));
+    deletedCartItem.then(() => res.redirect("/"));
   });
 };
