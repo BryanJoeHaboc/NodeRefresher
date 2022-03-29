@@ -7,13 +7,14 @@ const Sequelize = require("sequelize");
 
 const sequelize = require("./util/database");
 const Product = require("./models/product.model");
-const User = require("./models/user");
-
+const User = require("./models/user.model");
 const { adminRoutes } = require("./routes/admin.routes");
 const shopRoutes = require("./routes/shop.routes");
 const { get404Page } = require("./controllers/error.controller");
 const Cart = require("./models/cart.model");
-const CartItem = require("./models/cart-item");
+const CartItem = require("./models/cart-item.model");
+const Order = require("./models/order.model");
+const OrderItem = require("./models/order-item.model");
 
 const app = express();
 
@@ -45,12 +46,15 @@ Product.belongsTo(User, { constraints: true, onDelete: "CASCADE" });
 User.hasMany(Product);
 User.hasOne(Cart);
 Cart.belongsTo(User);
-Cart.belongsToMany(Product, { through: CartItem });
-Product.belongsToMany(Cart, { through: CartItem });
+Cart.belongsToMany(Product, { through: { model: CartItem, unique: false } });
+Product.belongsToMany(Cart, { through: { model: CartItem, unique: false } });
+Order.belongsTo(User);
+User.hasMany(Order);
+Order.belongsToMany(Product, { through: OrderItem });
 
 sequelize
-  .sync()
-  // .sync({ force: true })
+  // .sync()
+  .sync({ force: true })
   .then((res) => {
     // console.log(res);
     return User.findByPk(1);

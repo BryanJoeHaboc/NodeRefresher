@@ -1,5 +1,5 @@
 const Product = require("../models/product.model");
-const Cart = require("../models/cart.model");
+const Order = require("../models/order.model");
 
 exports.getProductsPage = (req, res) => {
   Product.findAll()
@@ -47,6 +47,7 @@ exports.postCart = async (req, res) => {
   const productId = req.body.productId;
   let fetchedCart;
   let newQuantity = 1;
+  console.log(productId, "product idddddddddddddddddddd");
   req.user
     .getCart()
     .then((cart) => {
@@ -83,7 +84,16 @@ exports.getCheckoutPage = (req, res) => {
 };
 
 exports.getOrderPage = (req, res) => {
-  res.render("shop/orders", { pageTitle: "My Cart", path: "/cart" });
+  req.user
+    .getOrders({ include: ["products"] })
+    .then((orders) => {
+      res.render("shop/orders", {
+        pageTitle: "My Orders",
+        path: "/orders",
+        orders,
+      });
+    })
+    .catch((err) => console.log(err));
 };
 
 exports.getProductPage = (req, res) => {
@@ -102,7 +112,6 @@ exports.getProductPage = (req, res) => {
 
 exports.postCartDeleteProduct = async (req, res) => {
   const prodId = req.body.productId;
-  console.log("prodIdddddddddddddd = ", req.body);
 
   req.user
     .getCart()
@@ -118,4 +127,36 @@ exports.postCartDeleteProduct = async (req, res) => {
       res.redirect("/");
     })
     .catch((err) => console.log(err));
+};
+
+exports.postOrder = (req, res) => {
+  let fetchedCart;
+  console.log("post orderrrrrrrrrrrrrrrrr");
+  req.user
+    .getCart()
+    .then((cart) => {
+      fetchedCart = cart;
+      return cart.getProducts();
+    })
+    .then((products) => {
+      return req.user.createOrder().then((order) => {
+        return order.addProducts(
+          products.map((product) => {
+            product.orderItem = { quantity: product.cartItem.quantity };
+            console.log("products section");
+            return product;
+          })
+        );
+      });
+    })
+    .then((result) => {
+      console.log("set products null");
+      return fetchedCart.setProducts(null);
+    })
+    .then((result) => {
+      console.log("dito na ko sa part na ttttttoooooooooooo");
+      res.redirect("/orders");
+    })
+
+    .catch((err) => console.log("error btich"));
 };
