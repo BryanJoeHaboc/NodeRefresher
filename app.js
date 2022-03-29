@@ -10,6 +10,7 @@ const Product = require("./models/product.model");
 const User = require("./models/user.model");
 const { adminRoutes } = require("./routes/admin.routes");
 const shopRoutes = require("./routes/shop.routes");
+const authRoutes = require("./routes/auth.routes");
 const { get404Page } = require("./controllers/error.controller");
 const Cart = require("./models/cart.model");
 const CartItem = require("./models/cart-item.model");
@@ -37,6 +38,7 @@ app.use((req, res, next) => {
 
 app.use("/admin", adminRoutes);
 app.use(shopRoutes);
+app.use(authRoutes);
 
 app.use(get404Page);
 
@@ -53,8 +55,8 @@ User.hasMany(Order);
 Order.belongsToMany(Product, { through: OrderItem });
 
 sequelize
-  // .sync()
-  .sync({ force: true })
+  .sync()
+  // .sync({ force: true })
   .then((res) => {
     // console.log(res);
     return User.findByPk(1);
