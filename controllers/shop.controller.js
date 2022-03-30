@@ -4,10 +4,12 @@ const Order = require("../models/order.model");
 exports.getProductsPage = (req, res) => {
   Product.findAll()
     .then((products) => {
+      console.log("req.sessioooooooooooooonnnnnnnnnnn", req.session);
       res.render("shop/product-list", {
         prods: products,
         pageTitle: "All Products",
         path: "/products",
+        isLoggedIn: req.session.isLoggedIn,
       });
     })
     .catch((err) => console.log(err));
@@ -16,10 +18,12 @@ exports.getProductsPage = (req, res) => {
 exports.getIndexPage = (req, res) => {
   Product.findAll()
     .then((products) => {
+      console.log("req.session", req.session);
       res.render("shop/product-list", {
         prods: products,
         pageTitle: "Shop",
         path: "/",
+        isLoggedIn: req.session.isLoggedIn,
       });
     })
     .catch((err) => console.log(err));
@@ -36,6 +40,7 @@ exports.getCartPage = async (req, res) => {
             pageTitle: "My Cart",
             path: "/cart",
             products: products,
+            isLoggedIn: req.session.isLoggedIn,
           });
         })
         .catch((err) => console.log(err));
@@ -80,7 +85,11 @@ exports.postCart = async (req, res) => {
 };
 
 exports.getCheckoutPage = (req, res) => {
-  res.render("shop/checkout", { pageTitle: "My Checkout", path: "/checkout" });
+  res.render("shop/checkout", {
+    pageTitle: "My Checkout",
+    path: "/checkout",
+    isLoggedIn: req.session.isLoggedIn,
+  });
 };
 
 exports.getOrderPage = (req, res) => {
@@ -91,6 +100,7 @@ exports.getOrderPage = (req, res) => {
         pageTitle: "My Orders",
         path: "/orders",
         orders,
+        isLoggedIn: req.session.isLoggedIn,
       });
     })
     .catch((err) => console.log(err));
@@ -105,6 +115,7 @@ exports.getProductPage = (req, res) => {
         pageTitle: product.title,
         product: product,
         path: "/products",
+        isLoggedIn: req.session.isLoggedIn,
       });
     })
     .catch((err) => console.log(err));

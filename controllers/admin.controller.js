@@ -1,4 +1,3 @@
-const { redirect } = require("express/lib/response");
 const Product = require("../models/product.model");
 
 exports.getAddProductPage = (req, res) => {
@@ -10,6 +9,7 @@ exports.getAddProductPage = (req, res) => {
     productCSS: true,
     activeAddProduct: true,
     editing: false,
+    isLoggedIn: req.session.isLoggedIn,
   });
 };
 
@@ -52,6 +52,7 @@ exports.getEditProductPage = async (req, res, next) => {
         path: "/admin/edit-product",
         editing: editMode,
         product: product,
+        isLoggedIn: req.session.isLoggedIn,
       });
     })
     .catch((err) => console.log(err));
@@ -80,6 +81,7 @@ exports.getProductsAdminPage = (req, res) => {
       path: "/admin/product-admin",
       hasProducts: products.length > 0,
       editing: true,
+      isLoggedIn: req.session.isLoggedIn,
     });
   });
 };
