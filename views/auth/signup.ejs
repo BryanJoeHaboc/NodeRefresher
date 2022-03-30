@@ -7,7 +7,15 @@
    <%- include('../includes/nav.ejs') %>
 
     <main>
-        <form class="login-form" action="/login" method="POST">
+        <form class="login-form" action="/signup" method="POST">
+            <div class="form-control">
+                <label for="firstName">First Name</label>
+                <input type="firstName" name="firstName" id="firstName">
+            </div>
+            <div class="form-control">
+                <label for="lastName">Last Name</label>
+                <input type="lastName" name="lastName" id="lastName">
+            </div>
             <div class="form-control">
                 <label for="email">E-Mail</label>
                 <input type="email" name="email" id="email">

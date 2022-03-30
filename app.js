@@ -55,20 +55,7 @@ app.use(authRoutes);
 app.use(get404Page);
 
 sequelize
-  // .sync({ force: true })
-  .sync()
-  .then((res) => {
-    return User.findByPk(1);
-  })
-  .then((user) => {
-    if (!user) {
-      return User.create({ displayName: "Max", email: "test@test.com" });
-    }
-    return Promise.resolve(user);
-  })
-  .then((user) => {
-    return user.createCart();
-  })
+  .sync({ force: true })
   .then((cart) => {
     app.listen(port, () => {
       console.log(`Listening on port ${port}`);
