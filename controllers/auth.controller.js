@@ -1,4 +1,5 @@
 const User = require("../models/user.model");
+const bcrypt = require("bcryptjs");
 
 const getLogin = (req, res) => {
   res.render("auth/login", {
@@ -9,8 +10,29 @@ const getLogin = (req, res) => {
 };
 
 const postLogin = (req, res) => {
-  req.session.isLoggedIn = true;
-  res.redirect("/");
+  const { email, password } = req.body;
+
+  User.findOne({ email })
+    .then((user) => {
+      if (!user) {
+        return res.redirect("/login");
+      }
+      bcrypt
+        .compare(password, user.password)
+        .then((doMatch) => {
+          if (doMatch) {
+            req.session.isLoggedIn = true;
+            req.session.user = user;
+            console.log(req.session.user);
+            return res.redirect("/");
+          }
+        })
+        .catch((err) => {
+          console.log("error in dehashing", err);
+          res.redirect("/login");
+        });
+    })
+    .catch((err) => console.log("errorrrrrr", err));
 };
 
 const postLogout = (req, res) => {
@@ -26,22 +48,23 @@ const postSignUp = (req, res) => {
   User.findOne({ where: { email: email } })
     .then((user) => {
       if (!user) {
-        return User.create({ firstName, lastName, email, password });
-      } else {
-        // res.send("User Already Exists"); pwede pala to kaso magtutuloy padin sa next then
-        return Promise.resolve("User already Exist");
-      }
-    })
-    .then((user) => {
-      if (user === "User already Exist") {
-        console.log("User Already Exist");
-        res.send("User Already Exists");
-      } else {
-        user.createCart().then((result) => {
-          res.redirect("/login");
+        return bcrypt.hash(password, 12).then((hashPassword) => {
+          return User.create({
+            firstName,
+            lastName,
+            email,
+            password: hashPassword,
+          }).then((user) => {
+            user.createCart().then((result) => {
+              res.redirect("/login");
+            });
+          });
         });
+      } else {
+        return res.redirect("/signup");
       }
     })
+
     .catch((err) => console.log("errorrrrrrrrrrrrrrrrr", err));
 };
 
