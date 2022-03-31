@@ -3,6 +3,7 @@ const express = require("express");
 const path = require("path");
 const bodyParser = require("body-parser");
 const csrf = require("csurf");
+const flash = require("connect-flash");
 
 const sequelize = require("./util/database");
 const Product = require("./models/product.model");
@@ -33,6 +34,8 @@ configSession(app);
 
 // csrf protection
 app.use(csrfProtection);
+
+app.use(flash());
 
 // find Dummy User
 // app.use((req, res, next) => {
