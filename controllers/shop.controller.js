@@ -1,15 +1,14 @@
 const Product = require("../models/product.model");
 const Order = require("../models/order.model");
+const User = require("../models/user.model");
 
 exports.getProductsPage = (req, res) => {
   Product.findAll()
     .then((products) => {
-      console.log("req.sessioooooooooooooonnnnnnnnnnn", req.session);
       res.render("shop/product-list", {
         prods: products,
         pageTitle: "All Products",
         path: "/products",
-        isLoggedIn: req.session.isLoggedIn,
       });
     })
     .catch((err) => console.log(err));
@@ -18,19 +17,19 @@ exports.getProductsPage = (req, res) => {
 exports.getIndexPage = (req, res) => {
   Product.findAll()
     .then((products) => {
-      console.log("req.session", req.session);
+      // console.log("req.session", req.session);
       res.render("shop/product-list", {
         prods: products,
         pageTitle: "Shop",
         path: "/",
-        isLoggedIn: req.session.isLoggedIn,
       });
     })
     .catch((err) => console.log(err));
 };
 
 exports.getCartPage = async (req, res) => {
-  req.user
+  const currentUser = User.build(req.session.user);
+  currentUser
     .getCart()
     .then((cart) => {
       return cart
@@ -40,7 +39,6 @@ exports.getCartPage = async (req, res) => {
             pageTitle: "My Cart",
             path: "/cart",
             products: products,
-            isLoggedIn: req.session.isLoggedIn,
           });
         })
         .catch((err) => console.log(err));
@@ -50,10 +48,9 @@ exports.getCartPage = async (req, res) => {
 
 exports.postCart = async (req, res) => {
   const productId = req.body.productId;
-  let fetchedCart;
-  let newQuantity = 1;
-  console.log(productId, "product idddddddddddddddddddd");
-  req.user
+
+  const currentUser = User.build(req.session.user);
+  currentUser
     .getCart()
     .then((cart) => {
       fetchedCart = cart;
@@ -70,7 +67,6 @@ exports.postCart = async (req, res) => {
         newQuantity = oldQuantity + 1;
         return product;
       }
-
       return Product.findByPk(productId);
     })
     .then((product) => {
@@ -88,19 +84,19 @@ exports.getCheckoutPage = (req, res) => {
   res.render("shop/checkout", {
     pageTitle: "My Checkout",
     path: "/checkout",
-    isLoggedIn: req.session.isLoggedIn,
   });
 };
 
 exports.getOrderPage = (req, res) => {
-  req.user
+  const currentUser = User.build(req.session.user);
+
+  currentUser
     .getOrders({ include: ["products"] })
     .then((orders) => {
       res.render("shop/orders", {
         pageTitle: "My Orders",
         path: "/orders",
         orders,
-        isLoggedIn: req.session.isLoggedIn,
       });
     })
     .catch((err) => console.log(err));
@@ -108,14 +104,12 @@ exports.getOrderPage = (req, res) => {
 
 exports.getProductPage = (req, res) => {
   const productId = req.params.productId;
-  console.log("productId", productId);
   Product.findByPk(productId)
     .then((product) => {
       res.render("shop/product-item", {
         pageTitle: product.title,
         product: product,
         path: "/products",
-        isLoggedIn: req.session.isLoggedIn,
       });
     })
     .catch((err) => console.log(err));
@@ -124,7 +118,9 @@ exports.getProductPage = (req, res) => {
 exports.postCartDeleteProduct = async (req, res) => {
   const prodId = req.body.productId;
 
-  req.user
+  const currentUser = User.build(req.session.user);
+
+  currentUser
     .getCart()
     .then((cart) => {
       return cart.getProducts({ where: { _id: prodId } });
@@ -142,30 +138,28 @@ exports.postCartDeleteProduct = async (req, res) => {
 
 exports.postOrder = (req, res) => {
   let fetchedCart;
-  console.log("post orderrrrrrrrrrrrrrrrr");
-  req.user
+  const currentUser = User.build(req.session.user);
+
+  currentUser
     .getCart()
     .then((cart) => {
       fetchedCart = cart;
       return cart.getProducts();
     })
     .then((products) => {
-      return req.user.createOrder().then((order) => {
+      return currentUser.createOrder().then((order) => {
         return order.addProducts(
           products.map((product) => {
             product.orderItem = { quantity: product.cartItem.quantity };
-            console.log("products section");
             return product;
           })
         );
       });
     })
     .then((result) => {
-      console.log("set products null");
       return fetchedCart.setProducts(null);
     })
     .then((result) => {
-      console.log("dito na ko sa part na ttttttoooooooooooo");
       res.redirect("/orders");
     })
 

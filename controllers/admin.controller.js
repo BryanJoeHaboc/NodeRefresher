@@ -1,4 +1,5 @@
 const Product = require("../models/product.model");
+const User = require("../models/user.model");
 
 exports.getAddProductPage = (req, res) => {
   console.log("add product page");
@@ -9,7 +10,6 @@ exports.getAddProductPage = (req, res) => {
     productCSS: true,
     activeAddProduct: true,
     editing: false,
-    isLoggedIn: req.session.isLoggedIn,
   });
 };
 
@@ -39,7 +39,9 @@ exports.getEditProductPage = async (req, res, next) => {
     return res.redirect("/");
   }
 
-  req.user
+  const currentUser = User.build(req.session.user);
+
+  currentUser
     .getProducts({ where: { _id: prodId } })
     .then((products) => {
       const product = products[0];
@@ -52,7 +54,6 @@ exports.getEditProductPage = async (req, res, next) => {
         path: "/admin/edit-product",
         editing: editMode,
         product: product,
-        isLoggedIn: req.session.isLoggedIn,
       });
     })
     .catch((err) => console.log(err));
@@ -62,7 +63,9 @@ exports.postAddProductPage = (req, res) => {
   req.body._id = null;
   const { title, imageUrl, description, price } = req.body;
 
-  req.user
+  const currentUser = User.build(req.session.user);
+
+  currentUser
     .createProduct({
       title: title,
       price: price,
@@ -74,14 +77,15 @@ exports.postAddProductPage = (req, res) => {
 };
 
 exports.getProductsAdminPage = (req, res) => {
-  req.user.getProducts().then((products) => {
+  const currentUser = User.build(req.session.user);
+
+  currentUser.getProducts().then((products) => {
     res.render("admin/product-admin", {
       prods: products,
       pageTitle: "Shop",
       path: "/admin/product-admin",
       hasProducts: products.length > 0,
       editing: true,
-      isLoggedIn: req.session.isLoggedIn,
     });
   });
 };

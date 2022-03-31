@@ -12,23 +12,25 @@ const {
   postOrder,
 } = require("../controllers/shop.controller");
 
+const { checkIfAuthenticated } = require("../middleware/is-auth");
+
 const router = express.Router();
 router.get("/", getIndexPage);
 
-router.get("/cart", getCartPage);
+router.get("/cart", checkIfAuthenticated, getCartPage);
 
-router.post("/cart", postCart);
+router.post("/cart", checkIfAuthenticated, postCart);
 
 router.get("/products", getProductsPage);
 
 router.get("/products/:productId", getProductPage);
 
-router.post("/cart-delete-item", postCartDeleteProduct);
+router.post("/cart-delete-item", checkIfAuthenticated, postCartDeleteProduct);
 
-router.post("/create-order", postOrder);
+router.post("/create-order", checkIfAuthenticated, postOrder);
 
-router.get("/checkout", getCheckoutPage);
+router.get("/checkout", checkIfAuthenticated, getCheckoutPage);
 
-router.get("/orders", getOrderPage);
+router.get("/orders", checkIfAuthenticated, getOrderPage);
 
 module.exports = router;

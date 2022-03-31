@@ -1,8 +1,8 @@
 // root file of node js
 const express = require("express");
 const path = require("path");
-
 const bodyParser = require("body-parser");
+const csrf = require("csurf");
 
 const sequelize = require("./util/database");
 const Product = require("./models/product.model");
@@ -20,6 +20,7 @@ const { get404Page } = require("./controllers/error.controller");
 
 const port = process.env.PORT || 5000;
 const app = express();
+const csrfProtection = csrf();
 
 app.set("view engine", "ejs");
 app.set("views", "views");
@@ -30,14 +31,20 @@ app.use(express.static(path.join(__dirname, "public")));
 // session
 configSession(app);
 
-app.use((req, res, next) => {
-  User.findByPk(1)
-    .then((user) => {
-      req.user = user;
-      next();
-    })
-    .catch((err) => console.log(err));
-});
+// csrf protection
+app.use(csrfProtection);
+
+// find Dummy User
+// app.use((req, res, next) => {
+//   User.findByPk(1)
+//     .then((user) => {
+//       req.user = user;
+//       console.log("is user an instance of user? ", user instanceof User);
+//       console.log("req.userrrrrrrrrrrrrrrr", req.user);
+//       next();
+//     })
+//     .catch((err) => console.log(err));
+// });
 
 Product.belongsTo(User, { constraints: true, onDelete: "CASCADE" });
 User.hasMany(Product);
@@ -49,13 +56,20 @@ Order.belongsTo(User);
 User.hasMany(Order);
 Order.belongsToMany(Product, { through: OrderItem });
 
+app.use((req, res, next) => {
+  res.locals.isLoggedIn = req.session.isLoggedIn;
+  res.locals.csrfToken = req.csrfToken();
+  next();
+});
+
 app.use("/admin", adminRoutes);
 app.use(shopRoutes);
 app.use(authRoutes);
 app.use(get404Page);
 
 sequelize
-  .sync({ force: true })
+  // .sync({ force: true })
+  .sync()
   .then((cart) => {
     app.listen(port, () => {
       console.log(`Listening on port ${port}`);

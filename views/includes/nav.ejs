@@ -29,8 +29,8 @@
       </li>
       <li class="main-header__item">
         <a
-          class="<%= path === '/admin/products' ? 'active' : '' %>"
-          href="/admin/products"
+          class="<%= path === '/admin/products' ? 'activ-admin' : '' %>"
+          href="/admin/product-admin"
           >Admin Products
         </a>
       </li>
@@ -52,6 +52,7 @@
       <li class="main-header__item">
         <form action="/logout" method="post">
           <button type="submit">Logout</button>
+          <input type="hidden" name="_csrf" value="<%=csrfToken%>" />
         </form>
       </li>
       <% } %>
@@ -87,9 +88,9 @@
     </li>
     <li class="mobile-nav__item">
       <a
-        class="<%= path === '/admin/products' ? 'active' : '' %>"
+        class="<%= path === '/admin/product-admin' ? 'active' : '' %>"
         href="/admin/products"
-        >Admin Products
+        >Admin Product-admin
       </a>
     </li>
     <% } %> <% if (!isLoggedIn) { %>
@@ -107,6 +108,7 @@
     <li class="mobile-nav__item">
       <form action="/logout" method="post">
         <button type="submit">Logout</button>
+        <input type="hidden" name="_csrf" value="<%=csrfToken%>" />
       </form>
     </li>
     <% } %>

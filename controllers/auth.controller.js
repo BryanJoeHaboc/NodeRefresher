@@ -11,21 +11,21 @@ const getLogin = (req, res) => {
 
 const postLogin = (req, res) => {
   const { email, password } = req.body;
-
-  User.findOne({ email })
+  User.findOne({ raw: true, nest: true, where: { email } })
     .then((user) => {
       if (!user) {
         return res.redirect("/login");
       }
+
       bcrypt
         .compare(password, user.password)
         .then((doMatch) => {
           if (doMatch) {
             req.session.isLoggedIn = true;
             req.session.user = user;
-            console.log(req.session.user);
             return res.redirect("/");
           }
+          res.redirect("/login");
         })
         .catch((err) => {
           console.log("error in dehashing", err);
@@ -36,7 +36,6 @@ const postLogin = (req, res) => {
 };
 
 const postLogout = (req, res) => {
-  console.log("hello nasa post log out ako");
   req.session.destroy(() => {
     res.redirect("/");
   });
@@ -65,7 +64,7 @@ const postSignUp = (req, res) => {
       }
     })
 
-    .catch((err) => console.log("errorrrrrrrrrrrrrrrrr", err));
+    .catch((err) => console.log("error", err));
 };
 
 const getSignUp = (req, res) => {
