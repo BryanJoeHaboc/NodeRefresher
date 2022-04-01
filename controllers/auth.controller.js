@@ -113,10 +113,21 @@ const getSignUp = (req, res) => {
   });
 };
 
+const getPasswordReset = (req, res) => {
+  const errorMessage = getErrorMessage(req);
+  res.render("auth/password-reset", {
+    pageTitle: "Reset Password",
+    path: "/reset",
+    isLoggedIn: false,
+    errorMessage,
+  });
+};
+
 module.exports = {
   getLogin,
+  getSignUp,
+  getPasswordReset,
   postLogin,
   postLogout,
-  getSignUp,
   postSignUp,
 };
