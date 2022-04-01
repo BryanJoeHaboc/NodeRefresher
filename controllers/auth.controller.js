@@ -1,5 +1,17 @@
-const User = require("../models/user.model");
 const bcrypt = require("bcryptjs");
+const nodemailer = require("nodemailer");
+const sendgridTransport = require("nodemailer-sendgrid-transport");
+
+const User = require("../models/user.model");
+
+const transporter = nodemailer.createTransport(
+  sendgridTransport({
+    auth: {
+      api_key:
+        "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",
+    },
+  })
+);
 
 const getErrorMessage = (req) => {
   const messages = req.flash("error");
@@ -68,11 +80,19 @@ const postSignUp = (req, res) => {
             lastName,
             email,
             password: hashPassword,
-          }).then((user) => {
-            user.createCart().then((result) => {
-              res.redirect("/login");
-            });
-          });
+          })
+            .then((user) => {
+              user.createCart().then((result) => {
+                res.redirect("/login");
+                transporter.sendMail({
+                  from: "bryanjoehaboc241@gmail.com",
+                  to: email,
+                  subject: "Signup succeeded",
+                  html: "<h1> You successfully signed up! </h1>",
+                });
+              });
+            })
+            .catch((err) => console.log(err));
         });
       } else {
         req.flash("error", "User already exists");
