@@ -18,15 +18,17 @@ exports.postEditProduct = (req, res) => {
 
   Product.findByPk(productId)
     .then((product) => {
+      if (product.userId !== req.session.user._id) return res.redirect("/");
+
       product.title = title;
       product.price = price;
       product.description = description;
       product.imageUrl = imageUrl;
-      return product.save();
-    })
-    .then(() => {
-      console.log("updated product");
-      res.redirect("/admin/product-admin");
+
+      return product.save().then(() => {
+        console.log("updated product");
+        res.redirect("/admin/product-admin");
+      });
     })
     .catch((err) => console.log(err));
 };
@@ -96,11 +98,13 @@ exports.deleteProduct = async (req, res) => {
 
   Product.findByPk(productId)
     .then((product) => {
-      return product.destroy();
+      if (product.userId !== req.session.user._id) return res.redirect("/");
+      else
+        return product.destroy().then(() => {
+          console.log("Product deleted");
+          res.redirect("/admin/product-admin");
+        });
     })
-    .then(() => {
-      console.log("Product deleted");
-      res.redirect("/admin/product-admin");
-    })
+
     .catch((err) => console.log(err));
 };

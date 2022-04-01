@@ -29,7 +29,7 @@
       </li>
       <li class="main-header__item">
         <a
-          class="<%= path === '/admin/products' ? 'activ-admin' : '' %>"
+          class="<%= path === '/admin/product-admin' ? 'activ-admin' : '' %>"
           href="/admin/product-admin"
           >Admin Products
         </a>
@@ -89,8 +89,8 @@
     <li class="mobile-nav__item">
       <a
         class="<%= path === '/admin/product-admin' ? 'active' : '' %>"
-        href="/admin/products"
-        >Admin Product-admin
+        href="/admin/product-admin"
+        >Admin Products
       </a>
     </li>
     <% } %> <% if (!isLoggedIn) { %>

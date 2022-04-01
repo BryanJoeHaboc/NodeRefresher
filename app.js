@@ -1,5 +1,5 @@
 // root file of node js
-require("dotenv").config();
+require("dotenv").config({ path: "./.env" });
 const express = require("express");
 const path = require("path");
 const bodyParser = require("body-parser");
@@ -76,7 +76,7 @@ sequelize
   // .sync()
   .then((cart) => {
     app.listen(port, () => {
-      console.log(process.env.SENDGRID_API_KEY);
+      console.log("sengrdiapikey", process.env.SENDGRID_API_KEY);
       console.log(`Listening on port ${port}`);
     });
   })

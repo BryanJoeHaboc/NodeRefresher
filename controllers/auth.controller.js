@@ -4,6 +4,7 @@ const bcrypt = require("bcryptjs");
 const nodemailer = require("nodemailer");
 const crypto = require("crypto");
 const sendgridTransport = require("nodemailer-sendgrid-transport");
+const { Op } = require("sequelize");
 
 const User = require("../models/user.model");
 
@@ -86,6 +87,7 @@ const postSignUp = (req, res) => {
             .then((user) => {
               user.createCart().then((result) => {
                 res.redirect("/login");
+                //NOTE: HINDI PA GUMAGANA TO KASI UNDER REVIEW PA SENDGRID KO 4-1-2022
                 transporter.sendMail({
                   from: process.env.SENDGRID_EMAIL,
                   to: email,
@@ -150,6 +152,7 @@ const postResetPassword = (req, res) => {
       .then((result) => {
         console.log(result);
         res.redirect("/");
+        //NOTE: HINDI PA GUMAGANA TO KASI UNDER REVIEW PA SENDGRID KO 4-1-2022
         transporter.sendMail({
           from: "someemail@example.com",
           to: req.body.email,
@@ -163,12 +166,65 @@ const postResetPassword = (req, res) => {
   });
 };
 
+//NOTE: HINDI PA GUMAGANA TO KASI UNDER REVIEW PA SENDGRID KO 4-1-2022
+const getNewPassword = (req, res, next) => {
+  const resetToken = req.params.token;
+  User.findOne({
+    where: {
+      [Op.and]: [
+        {
+          resetToken,
+        },
+        {
+          resetTokenExpirationDate: {
+            [Op.gte]: Date.now(),
+          },
+        },
+      ],
+    },
+  }).then((user) => {
+    const errorMessage = getErrorMessage(req);
+
+    res.render("auth/new-password", {
+      path: "/new-password",
+      pageTitle: "New Password",
+      errorMessage,
+      isLoggedIn: false,
+      userId: user._id.toString(),
+      passwordToken: resetToken,
+    });
+  });
+};
+
+const postNewPassword = (req, res, next) => {
+  const { newPassword, userId, passwordToken } = req.body;
+  let currentUser;
+  bcrypt
+    .hash(newPassword, 12)
+    .then((hashedPassword) => {
+      return User.update(
+        {
+          resetToken: undefined,
+          resetTokenExpirationDate: undefined,
+          password: hashedPassword,
+        },
+        { where: { _id: userId, resetToken: passwordToken } }
+      );
+    })
+    .then((result) => {
+      res.redirect("/login");
+    })
+    .catch((err) => console.log(err));
+};
+
 module.exports = {
   getLogin,
   getSignUp,
   getResetPassword,
+  getNewPassword,
   postLogin,
   postLogout,
   postSignUp,
   postResetPassword,
+  postNewPassword,
 };
