@@ -1,4 +1,5 @@
 // root file of node js
+require("dotenv").config();
 const express = require("express");
 const path = require("path");
 const bodyParser = require("body-parser");
@@ -71,10 +72,11 @@ app.use(authRoutes);
 app.use(get404Page);
 
 sequelize
-  // .sync({ force: true })
-  .sync()
+  .sync({ force: true })
+  // .sync()
   .then((cart) => {
     app.listen(port, () => {
+      console.log(process.env.SENDGRID_API_KEY);
       console.log(`Listening on port ${port}`);
     });
   })
