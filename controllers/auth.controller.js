@@ -5,6 +5,7 @@ const nodemailer = require("nodemailer");
 const crypto = require("crypto");
 const sendgridTransport = require("nodemailer-sendgrid-transport");
 const { Op } = require("sequelize");
+const { validationResult } = require("express-validator/check");
 
 const User = require("../models/user.model");
 
@@ -73,6 +74,17 @@ const postLogout = (req, res) => {
 
 const postSignUp = (req, res) => {
   const { firstName, lastName, email, password, confirmPassword } = req.body;
+
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    return res.status(422).render("auth/signup", {
+      pageTitle: "Login",
+      path: "/signup",
+      isLoggedIn: false,
+      errorMessage: errors.array()[0].msg,
+    });
+  }
 
   User.findOne({ where: { email: email } })
     .then((user) => {
