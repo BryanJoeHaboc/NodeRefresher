@@ -72,8 +72,8 @@ app.use(authRoutes);
 app.use(get404Page);
 
 sequelize
-  .sync({ force: true })
-  // .sync()
+  // .sync({ force: true })
+  .sync()
   .then((cart) => {
     app.listen(port, () => {
       console.log("sengrdiapikey", process.env.SENDGRID_API_KEY);

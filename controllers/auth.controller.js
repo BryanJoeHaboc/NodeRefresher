@@ -36,16 +36,38 @@ const getLogin = (req, res) => {
     path: "/login",
     isLoggedIn: false,
     errorMessage,
+    oldInput: { email: "", password: "" },
+    validationErrors: [],
   });
 };
 
 const postLogin = (req, res) => {
   const { email, password } = req.body;
+
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    return res.status(422).render("auth/login", {
+      pageTitle: "Login",
+      path: "/login",
+      isLoggedIn: false,
+      errorMessage: errors.array()[0].msg,
+      oldInput: { email, password },
+      validationErrors: errors.array(),
+    });
+  }
+
   User.findOne({ raw: true, nest: true, where: { email } })
     .then((user) => {
       if (!user) {
-        req.flash("error", "Invalid email or password");
-        return res.redirect("/login");
+        return res.status(422).render("auth/login", {
+          pageTitle: "Login",
+          path: "/login",
+          isLoggedIn: false,
+          errorMessage: "Invalid email or password",
+          oldInput: { email, password },
+          validationErrors: [],
+        });
       }
 
       bcrypt
@@ -56,11 +78,25 @@ const postLogin = (req, res) => {
             req.session.user = user;
             return res.redirect("/");
           }
-          res.redirect("/login");
+          return res.status(422).render("auth/login", {
+            pageTitle: "Login",
+            path: "/login",
+            isLoggedIn: false,
+            errorMessage: "Invalid email or password",
+            oldInput: { email, password },
+            validationErrors: [],
+          });
         })
         .catch((err) => {
           console.log("error in dehashing", err);
-          res.redirect("/login");
+          return res.status(422).render("auth/login", {
+            pageTitle: "Login",
+            path: "/login",
+            isLoggedIn: false,
+            errorMessage: "Invalid email or password",
+            oldInput: { email, password },
+            validationErrors: [],
+          });
         });
     })
     .catch((err) => console.log("errorrrrrr", err));
@@ -83,49 +119,49 @@ const postSignUp = (req, res) => {
       path: "/signup",
       isLoggedIn: false,
       errorMessage: errors.array()[0].msg,
+      oldInput: { email, password, confirmPassword, firstName, lastName },
+      validationErrors: errors.array(),
     });
   }
 
-  User.findOne({ where: { email: email } })
-    .then((user) => {
-      if (!user) {
-        return bcrypt.hash(password, 12).then((hashPassword) => {
-          return User.create({
-            firstName,
-            lastName,
-            email,
-            password: hashPassword,
-          })
-            .then((user) => {
-              user.createCart().then((result) => {
-                res.redirect("/login");
-                //NOTE: HINDI PA GUMAGANA TO KASI UNDER REVIEW PA SENDGRID KO 4-1-2022
-                transporter.sendMail({
-                  from: process.env.SENDGRID_EMAIL,
-                  to: email,
-                  subject: "Signup succeeded",
-                  html: "<h1> You successfully signed up! </h1>",
-                });
-              });
-            })
-            .catch((err) => console.log(err));
-        });
-      } else {
-        req.flash("error", "User already exists");
-        return res.redirect("/signup");
-      }
+  bcrypt.hash(password, 12).then((hashPassword) => {
+    return User.create({
+      firstName,
+      lastName,
+      email,
+      password: hashPassword,
     })
-
-    .catch((err) => console.log("error", err));
+      .then((user) => {
+        user.createCart().then((result) => {
+          res.redirect("/login");
+          //NOTE: HINDI PA GUMAGANA TO KASI UNDER REVIEW PA SENDGRID KO 4-1-2022
+          transporter.sendMail({
+            from: process.env.SENDGRID_EMAIL,
+            to: email,
+            subject: "Signup succeeded",
+            html: "<h1> You successfully signed up! </h1>",
+          });
+        });
+      })
+      .catch((err) => console.log(err));
+  });
 };
 
 const getSignUp = (req, res) => {
   const errorMessage = getErrorMessage(req);
   res.render("auth/signup", {
-    pageTitle: "Login",
+    pageTitle: "SignUp",
     path: "/signup",
     isLoggedIn: false,
     errorMessage,
+    oldInput: {
+      email: "",
+      password: "",
+      confirmPassword: "",
+      firstName: "",
+      lastName: "",
+    },
+    validationErrors: [],
   });
 };
 
@@ -140,7 +176,6 @@ const getResetPassword = (req, res) => {
 };
 
 const postResetPassword = (req, res) => {
-  const errorMessage = getErrorMessage(req);
   crypto.randomBytes(32, (err, buffer) => {
     if (err) {
       return res.redirect("/reset");

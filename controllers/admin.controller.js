@@ -1,20 +1,35 @@
 const Product = require("../models/product.model");
 const User = require("../models/user.model");
+const { validationResult } = require("express-validator/check");
 
 exports.getAddProductPage = (req, res) => {
   console.log("add product page");
   res.render("admin/edit-product", {
     pageTitle: "Add Products",
     path: "/admin/add-product",
-    formsCSS: true,
-    productCSS: true,
-    activeAddProduct: true,
     editing: false,
+    hasError: false,
+    product: { title: "", description: "", price: "" },
+    oldInput: { title: "", description: "", price: "", imageUrl: "" },
+    errorMessage: "",
+    validationErrors: [],
   });
 };
 
 exports.postEditProduct = (req, res) => {
   const { productId, title, price, imageUrl, description } = req.body;
+
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    return res.status(422).render("admin/edit-product", {
+      pageTitle: "Edit Product",
+      path: "/admin/edit-product",
+      errorMessage: errors.array()[0].msg,
+      oldInput: { title, price, imageUrl, description },
+      validationErrors: errors.array(),
+    });
+  }
 
   Product.findByPk(productId)
     .then((product) => {
@@ -53,9 +68,13 @@ exports.getEditProductPage = async (req, res, next) => {
 
       res.render("admin/edit-product", {
         pageTitle: "Edit Product",
-        path: "/admin/edit-product",
-        editing: editMode,
-        product: product,
+        path: "/admin/eadd-product",
+        editing: true,
+        hasError: false,
+        errorMessage: "",
+        product,
+        oldInput: { title: "", price: "", imageUrl: "", description: "" },
+        validationErrors: [],
       });
     })
     .catch((err) => console.log(err));
@@ -64,6 +83,21 @@ exports.getEditProductPage = async (req, res, next) => {
 exports.postAddProductPage = (req, res) => {
   req.body._id = null;
   const { title, imageUrl, description, price } = req.body;
+
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    return res.status(422).render("admin/edit-product", {
+      pageTitle: "Add Product",
+      path: "/admin/add-product",
+      editing: false,
+      hasError: true,
+      product: { title, price, imageUrl, description },
+      errorMessage: errors.array()[0].msg,
+      oldInput: { title, price, imageUrl, description },
+      validationErrors: errors.array(),
+    });
+  }
 
   const currentUser = User.build(req.session.user);
 

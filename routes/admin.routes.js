@@ -11,11 +11,21 @@ const {
 
 const { checkIfAuthenticated } = require("../middleware/is-auth");
 
+const {
+  postAddProductValidator,
+  postEditProductValidator,
+} = require("../middleware/auth-validators");
+
 const router = express.Router();
 
 router.get("/add-product", checkIfAuthenticated, getAddProductPage);
 
-router.post("/add-product", checkIfAuthenticated, postAddProductPage);
+router.post(
+  "/add-product",
+  checkIfAuthenticated,
+  postAddProductValidator,
+  postAddProductPage
+);
 
 router.get("/product-admin", checkIfAuthenticated, getProductsAdminPage);
 
@@ -25,7 +35,12 @@ router.get(
   getEditProductPage
 );
 
-router.post("/edit-product", checkIfAuthenticated, postEditProduct);
+router.post(
+  "/edit-product",
+  checkIfAuthenticated,
+  postEditProductValidator,
+  postEditProduct
+);
 
 router.post("/delete-product", checkIfAuthenticated, deleteProduct);
 
