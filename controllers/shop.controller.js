@@ -2,7 +2,7 @@ const Product = require("../models/product.model");
 const Order = require("../models/order.model");
 const User = require("../models/user.model");
 
-exports.getProductsPage = (req, res) => {
+const getProductsPage = (req, res) => {
   Product.findAll()
     .then((products) => {
       res.render("shop/product-list", {
@@ -11,10 +11,14 @@ exports.getProductsPage = (req, res) => {
         path: "/products",
       });
     })
-    .catch((err) => console.log(err));
+    .catch((err) => {
+      const error = new Error(err);
+      error.httpsStatusCode = 500;
+      return next(error);
+    });
 };
 
-exports.getIndexPage = (req, res) => {
+const getIndexPage = (req, res) => {
   Product.findAll()
     .then((products) => {
       // console.log("req.session", req.session);
@@ -24,10 +28,14 @@ exports.getIndexPage = (req, res) => {
         path: "/",
       });
     })
-    .catch((err) => console.log(err));
+    .catch((err) => {
+      const error = new Error(err);
+      error.httpsStatusCode = 500;
+      return next(error);
+    });
 };
 
-exports.getCartPage = async (req, res) => {
+const getCartPage = async (req, res) => {
   const currentUser = User.build(req.session.user);
   currentUser
     .getCart()
@@ -41,12 +49,20 @@ exports.getCartPage = async (req, res) => {
             products: products,
           });
         })
-        .catch((err) => console.log(err));
+        .catch((err) => {
+          const error = new Error(err);
+          error.httpsStatusCode = 500;
+          return next(error);
+        });
     })
-    .catch((err) => console.log(err));
+    .catch((err) => {
+      const error = new Error(err);
+      error.httpsStatusCode = 500;
+      return next(error);
+    });
 };
 
-exports.postCart = async (req, res) => {
+const postCart = async (req, res) => {
   const productId = req.body.productId;
 
   const currentUser = User.build(req.session.user);
@@ -77,17 +93,21 @@ exports.postCart = async (req, res) => {
     .then(() => {
       res.redirect("/cart");
     })
-    .catch((err) => console.log(err));
+    .catch((err) => {
+      const error = new Error(err);
+      error.httpsStatusCode = 500;
+      return next(error);
+    });
 };
 
-exports.getCheckoutPage = (req, res) => {
+const getCheckoutPage = (req, res) => {
   res.render("shop/checkout", {
     pageTitle: "My Checkout",
     path: "/checkout",
   });
 };
 
-exports.getOrderPage = (req, res) => {
+const getOrderPage = (req, res) => {
   const currentUser = User.build(req.session.user);
 
   currentUser
@@ -99,10 +119,14 @@ exports.getOrderPage = (req, res) => {
         orders,
       });
     })
-    .catch((err) => console.log(err));
+    .catch((err) => {
+      const error = new Error(err);
+      error.httpsStatusCode = 500;
+      return next(error);
+    });
 };
 
-exports.getProductPage = (req, res) => {
+const getProductPage = (req, res) => {
   const productId = req.params.productId;
   Product.findByPk(productId)
     .then((product) => {
@@ -112,10 +136,14 @@ exports.getProductPage = (req, res) => {
         path: "/products",
       });
     })
-    .catch((err) => console.log(err));
+    .catch((err) => {
+      const error = new Error(err);
+      error.httpsStatusCode = 500;
+      return next(error);
+    });
 };
 
-exports.postCartDeleteProduct = async (req, res) => {
+const postCartDeleteProduct = async (req, res) => {
   const prodId = req.body.productId;
 
   const currentUser = User.build(req.session.user);
@@ -133,10 +161,14 @@ exports.postCartDeleteProduct = async (req, res) => {
     .then(() => {
       res.redirect("/");
     })
-    .catch((err) => console.log(err));
+    .catch((err) => {
+      const error = new Error(err);
+      error.httpsStatusCode = 500;
+      return next(error);
+    });
 };
 
-exports.postOrder = (req, res) => {
+const postOrder = (req, res) => {
   let fetchedCart;
   const currentUser = User.build(req.session.user);
 
@@ -162,6 +194,21 @@ exports.postOrder = (req, res) => {
     .then((result) => {
       res.redirect("/orders");
     })
+    .catch((err) => {
+      const error = new Error(err);
+      error.httpsStatusCode = 500;
+      return next(error);
+    });
+};
 
-    .catch((err) => console.log("error btich"));
+module.exports = {
+  getProductsPage,
+  getIndexPage,
+  getCartPage,
+  postCart,
+  getCheckoutPage,
+  getOrderPage,
+  getProductPage,
+  postCartDeleteProduct,
+  postOrder,
 };

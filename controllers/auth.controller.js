@@ -99,7 +99,11 @@ const postLogin = (req, res) => {
           });
         });
     })
-    .catch((err) => console.log("errorrrrrr", err));
+    .catch((err) => {
+      const error = new Error(err);
+      error.httpsStatusCode = 500;
+      return next(error);
+    });
 };
 
 const postLogout = (req, res) => {
@@ -143,7 +147,11 @@ const postSignUp = (req, res) => {
           });
         });
       })
-      .catch((err) => console.log(err));
+      .catch((err) => {
+        const error = new Error(err);
+        error.httpsStatusCode = 500;
+        return next(error);
+      });
   });
 };
 
@@ -209,7 +217,11 @@ const postResetPassword = (req, res) => {
           <p>This reset email is only valid for one hour</p>`,
         });
       })
-      .catch((err) => console.log(err));
+      .catch((err) => {
+        const error = new Error(err);
+        error.httpsStatusCode = 500;
+        return next(error);
+      });
   });
 };
 
@@ -261,7 +273,11 @@ const postNewPassword = (req, res, next) => {
     .then((result) => {
       res.redirect("/login");
     })
-    .catch((err) => console.log(err));
+    .catch((err) => {
+      const error = new Error(err);
+      error.httpsStatusCode = 500;
+      return next(error);
+    });
 };
 
 module.exports = {

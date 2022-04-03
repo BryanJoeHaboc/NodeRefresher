@@ -18,7 +18,7 @@ const configSession = require("./config/session");
 const { adminRoutes } = require("./routes/admin.routes");
 const shopRoutes = require("./routes/shop.routes");
 const authRoutes = require("./routes/auth.routes");
-const { get404Page } = require("./controllers/error.controller");
+const { get404Page, get500Page } = require("./controllers/error.controller");
 
 const port = process.env.PORT || 5000;
 const app = express();
@@ -69,7 +69,13 @@ app.use((req, res, next) => {
 app.use("/admin", adminRoutes);
 app.use(shopRoutes);
 app.use(authRoutes);
+
+app.get("/500", get500Page);
 app.use(get404Page);
+
+app.use((error, req, res, next) => {
+  res.redirect("/500");
+});
 
 sequelize
   // .sync({ force: true })

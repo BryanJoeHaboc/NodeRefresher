@@ -2,7 +2,7 @@ const Product = require("../models/product.model");
 const User = require("../models/user.model");
 const { validationResult } = require("express-validator/check");
 
-exports.getAddProductPage = (req, res) => {
+const getAddProductPage = (req, res) => {
   console.log("add product page");
   res.render("admin/edit-product", {
     pageTitle: "Add Products",
@@ -16,7 +16,7 @@ exports.getAddProductPage = (req, res) => {
   });
 };
 
-exports.postEditProduct = (req, res) => {
+const postEditProduct = (req, res, next) => {
   const { productId, title, price, imageUrl, description } = req.body;
 
   const errors = validationResult(req);
@@ -45,10 +45,14 @@ exports.postEditProduct = (req, res) => {
         res.redirect("/admin/product-admin");
       });
     })
-    .catch((err) => console.log(err));
+    .catch((err) => {
+      const error = new Error(err);
+      error.httpsStatusCode = 500;
+      return next(error);
+    });
 };
 
-exports.getEditProductPage = async (req, res, next) => {
+const getEditProductPage = async (req, res, next) => {
   const editMode = req.query.editing || req.params.editing;
   const prodId = req.params.productId;
 
@@ -77,10 +81,14 @@ exports.getEditProductPage = async (req, res, next) => {
         validationErrors: [],
       });
     })
-    .catch((err) => console.log(err));
+    .catch((err) => {
+      const error = new Error(err);
+      error.httpsStatusCode = 500;
+      return next(error);
+    });
 };
 
-exports.postAddProductPage = (req, res) => {
+const postAddProductPage = (req, res, next) => {
   req.body._id = null;
   const { title, imageUrl, description, price } = req.body;
 
@@ -109,10 +117,14 @@ exports.postAddProductPage = (req, res) => {
       description: description,
     })
     .then(() => res.redirect("/admin/product-admin"))
-    .catch((err) => console.log(err));
+    .catch((err) => {
+      const error = new Error(err);
+      error.httpsStatusCode = 500;
+      return next(error);
+    });
 };
 
-exports.getProductsAdminPage = (req, res) => {
+const getProductsAdminPage = (req, res) => {
   const currentUser = User.build(req.session.user);
 
   currentUser.getProducts().then((products) => {
@@ -126,7 +138,7 @@ exports.getProductsAdminPage = (req, res) => {
   });
 };
 
-exports.deleteProduct = async (req, res) => {
+const deleteProduct = async (req, res, next) => {
   const productId = req.body.productId;
   console.log(productId);
 
@@ -140,5 +152,18 @@ exports.deleteProduct = async (req, res) => {
         });
     })
 
-    .catch((err) => console.log(err));
+    .catch((err) => {
+      const error = new Error(err);
+      error.httpsStatusCode = 500;
+      return next(error);
+    });
+};
+
+module.exports = {
+  getAddProductPage,
+  postEditProduct,
+  getEditProductPage,
+  postAddProductPage,
+  getProductsAdminPage,
+  deleteProduct,
 };
