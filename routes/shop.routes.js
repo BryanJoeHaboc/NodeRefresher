@@ -11,6 +11,7 @@ const {
   postSubtractCart,
   postCartDeleteProduct,
   postOrder,
+  getInvoice,
 } = require("../controllers/shop.controller");
 
 const { checkIfAuthenticated } = require("../middleware/is-auth");
@@ -35,5 +36,7 @@ router.post("/create-order", checkIfAuthenticated, postOrder);
 router.get("/checkout", checkIfAuthenticated, getCheckoutPage);
 
 router.get("/orders", checkIfAuthenticated, getOrderPage);
+
+router.get("/orders/:orderId", checkIfAuthenticated, getInvoice);
 
 module.exports = router;
