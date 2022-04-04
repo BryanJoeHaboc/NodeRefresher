@@ -12,6 +12,7 @@ const getProductsPage = (req, res) => {
       });
     })
     .catch((err) => {
+      console.log(err);
       const error = new Error(err);
       error.httpsStatusCode = 500;
       return next(error);
@@ -29,6 +30,7 @@ const getIndexPage = (req, res) => {
       });
     })
     .catch((err) => {
+      console.log(err);
       const error = new Error(err);
       error.httpsStatusCode = 500;
       return next(error);
@@ -56,6 +58,7 @@ const getCartPage = async (req, res) => {
         });
     })
     .catch((err) => {
+      console.log(err);
       const error = new Error(err);
       error.httpsStatusCode = 500;
       return next(error);
@@ -64,6 +67,8 @@ const getCartPage = async (req, res) => {
 
 const postCart = async (req, res) => {
   const productId = req.body.productId;
+
+  let newQuantity = 1;
 
   const currentUser = User.build(req.session.user);
   currentUser
@@ -94,6 +99,7 @@ const postCart = async (req, res) => {
       res.redirect("/cart");
     })
     .catch((err) => {
+      console.log(err);
       const error = new Error(err);
       error.httpsStatusCode = 500;
       return next(error);
@@ -120,6 +126,7 @@ const getOrderPage = (req, res) => {
       });
     })
     .catch((err) => {
+      console.log(err);
       const error = new Error(err);
       error.httpsStatusCode = 500;
       return next(error);
@@ -137,6 +144,7 @@ const getProductPage = (req, res) => {
       });
     })
     .catch((err) => {
+      console.log(err);
       const error = new Error(err);
       error.httpsStatusCode = 500;
       return next(error);
@@ -162,6 +170,7 @@ const postCartDeleteProduct = async (req, res) => {
       res.redirect("/");
     })
     .catch((err) => {
+      console.log(err);
       const error = new Error(err);
       error.httpsStatusCode = 500;
       return next(error);
@@ -195,10 +204,42 @@ const postOrder = (req, res) => {
       res.redirect("/orders");
     })
     .catch((err) => {
+      console.log(err);
       const error = new Error(err);
       error.httpsStatusCode = 500;
       return next(error);
     });
+};
+
+const postSubtractCart = (req, res, next) => {
+  const prodId = req.body.productId;
+
+  const currentUser = User.build(req.session.user);
+  let fetchedCart = [];
+  currentUser
+    .getCart()
+    .then((cart) => {
+      fetchedCart = cart;
+      return cart.getProducts({ where: { _id: prodId } });
+    })
+    .then((product) => {
+      const cartItem = product[0].cartItem;
+      let { quantity } = product[0].cartItem;
+      if (quantity === 1) {
+        return product[0].cartItem.destroy();
+      } else {
+        quantity = quantity - 1;
+      }
+      cartItem.quantity = quantity;
+      console.log(cartItem.quantity);
+      return fetchedCart.addProduct(product, {
+        through: { quantity: cartItem.quantity },
+      });
+    })
+    .then((product) => {
+      res.redirect("/cart");
+    })
+    .catch((err) => console.log(err));
 };
 
 module.exports = {
@@ -211,4 +252,5 @@ module.exports = {
   getProductPage,
   postCartDeleteProduct,
   postOrder,
+  postSubtractCart,
 };

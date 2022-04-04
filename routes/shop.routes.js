@@ -8,6 +8,7 @@ const {
   getOrderPage,
   getProductPage,
   postCart,
+  postSubtractCart,
   postCartDeleteProduct,
   postOrder,
 } = require("../controllers/shop.controller");
@@ -20,6 +21,8 @@ router.get("/", getIndexPage);
 router.get("/cart", checkIfAuthenticated, getCartPage);
 
 router.post("/cart", checkIfAuthenticated, postCart);
+
+router.post("/subtract-cart", checkIfAuthenticated, postSubtractCart);
 
 router.get("/products", getProductsPage);
 

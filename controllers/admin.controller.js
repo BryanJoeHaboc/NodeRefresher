@@ -1,9 +1,8 @@
 const Product = require("../models/product.model");
 const User = require("../models/user.model");
-const { validationResult } = require("express-validator/check");
+const { validationResult } = require("express-validator");
 
 const getAddProductPage = (req, res) => {
-  console.log("add product page");
   res.render("admin/edit-product", {
     pageTitle: "Add Products",
     path: "/admin/add-product",
@@ -17,8 +16,9 @@ const getAddProductPage = (req, res) => {
 };
 
 const postEditProduct = (req, res, next) => {
-  const { productId, title, price, imageUrl, description } = req.body;
+  const { productId, title, price, description } = req.body;
 
+  const image = req.file;
   const errors = validationResult(req);
 
   if (!errors.isEmpty()) {
@@ -38,14 +38,17 @@ const postEditProduct = (req, res, next) => {
       product.title = title;
       product.price = price;
       product.description = description;
-      product.imageUrl = imageUrl;
 
+      if (image) {
+        product.imageUrl = image.path;
+      }
       return product.save().then(() => {
         console.log("updated product");
         res.redirect("/admin/product-admin");
       });
     })
     .catch((err) => {
+      console.log(err);
       const error = new Error(err);
       error.httpsStatusCode = 500;
       return next(error);
@@ -82,6 +85,7 @@ const getEditProductPage = async (req, res, next) => {
       });
     })
     .catch((err) => {
+      console.log(err);
       const error = new Error(err);
       error.httpsStatusCode = 500;
       return next(error);
@@ -90,22 +94,23 @@ const getEditProductPage = async (req, res, next) => {
 
 const postAddProductPage = (req, res, next) => {
   req.body._id = null;
-  const { title, imageUrl, description, price } = req.body;
+  const { title, description, price } = req.body;
+  const image = req.file;
 
-  const errors = validationResult(req);
-
-  if (!errors.isEmpty()) {
+  if (!image) {
     return res.status(422).render("admin/edit-product", {
       pageTitle: "Add Product",
       path: "/admin/add-product",
       editing: false,
       hasError: true,
-      product: { title, price, imageUrl, description },
-      errorMessage: errors.array()[0].msg,
-      oldInput: { title, price, imageUrl, description },
-      validationErrors: errors.array(),
+      product: { title, price, description },
+      errorMessage: "Attached file is not an image",
+      oldInput: { title, price, description },
+      validationErrors: [],
     });
   }
+
+  const imageUrl = image.path;
 
   const currentUser = User.build(req.session.user);
 
@@ -118,6 +123,7 @@ const postAddProductPage = (req, res, next) => {
     })
     .then(() => res.redirect("/admin/product-admin"))
     .catch((err) => {
+      console.log("error at postAddProduct", err);
       const error = new Error(err);
       error.httpsStatusCode = 500;
       return next(error);
@@ -153,6 +159,7 @@ const deleteProduct = async (req, res, next) => {
     })
 
     .catch((err) => {
+      console.log(err);
       const error = new Error(err);
       error.httpsStatusCode = 500;
       return next(error);

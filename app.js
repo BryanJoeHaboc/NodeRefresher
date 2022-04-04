@@ -5,6 +5,7 @@ const path = require("path");
 const bodyParser = require("body-parser");
 const csrf = require("csurf");
 const flash = require("connect-flash");
+const multer = require("multer");
 
 const sequelize = require("./util/database");
 const Product = require("./models/product.model");
@@ -27,8 +28,33 @@ const csrfProtection = csrf();
 app.set("view engine", "ejs");
 app.set("views", "views");
 
+const fileStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "public/images");
+  },
+  filename: (req, file, cb) => {
+    const fileName =
+      new Date().toISOString().split(":").join("-") + file.originalname;
+    console.log(fileName);
+    cb(null, fileName);
+  },
+});
+
+const fileFilter = (req, file, cb) => {
+  file.mimetype === "image/png" ||
+  file.mimetype === "image/jpg" ||
+  file.mimetype === "image/jpeg"
+    ? cb(null, true)
+    : cb(null, false);
+};
+
 app.use(bodyParser.urlencoded({ extended: false }));
+app.use(multer({ storage: fileStorage, fileFilter }).single("image"));
 app.use(express.static(path.join(__dirname, "public")));
+app.use(
+  "/public/images",
+  express.static(path.join(__dirname, "public/images"))
+);
 
 // session
 configSession(app);
@@ -73,9 +99,7 @@ app.use(authRoutes);
 app.get("/500", get500Page);
 app.use(get404Page);
 
-app.use((error, req, res, next) => {
-  res.redirect("/500");
-});
+// app.use((error, req, res, next) => {});
 
 sequelize
   // .sync({ force: true })

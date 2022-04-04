@@ -1,4 +1,4 @@
-const { body } = require("express-validator/check");
+const { body } = require("express-validator");
 const User = require("../models/user.model");
 
 const postSignUpValidator = [
@@ -56,7 +56,6 @@ const postAddProductValidator = [
     .isLength({ min: 3 })
     .withMessage("Title must be atleast three characters long.")
     .trim(),
-  body("imageUrl").isURL().withMessage("Enter a valid image URL"),
   body("price").isFloat().withMessage("Please input a valid price value"),
   body("description")
     .isString()
@@ -73,7 +72,6 @@ const postEditProductValidator = [
     .isLength({ min: 3 })
     .withMessage("Title must be atleast three characters long.")
     .trim(),
-  body("imageUrl").isURL().withMessage("Enter a valid image URL"),
   body("price").isFloat().withMessage("Please input a valid price value"),
   body("description")
     .isString()
