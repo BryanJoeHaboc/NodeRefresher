@@ -148,25 +148,26 @@ const getProductsAdminPage = (req, res) => {
 };
 
 const deleteProduct = async (req, res, next) => {
-  const productId = req.body.productId;
+  const productId = req.params.productId;
   console.log(productId);
 
   Product.findByPk(productId)
     .then((product) => {
       if (product.userId !== req.session.user._id) return res.redirect("/");
       else
-        return product.destroy().then(() => {
-          console.log("Product deleted");
-          deleteFile(product.imageUrl);
-          res.redirect("/admin/product-admin");
-        });
+        return product
+          .destroy()
+          .then(() => {
+            console.log("Product deleted");
+            deleteFile(product.imageUrl);
+          })
+          .then((result) =>
+            res.status(200).json({ message: '"Product Deleted!"' })
+          );
     })
 
     .catch((err) => {
-      console.log(err);
-      const error = new Error(err);
-      error.httpsStatusCode = 500;
-      return next(error);
+      res.status(500).send("Error deleting the product");
     });
 };
 

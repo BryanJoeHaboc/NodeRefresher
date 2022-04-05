@@ -42,7 +42,7 @@ router.post(
   postEditProduct
 );
 
-router.post("/delete-product", checkIfAuthenticated, deleteProduct);
+router.delete("/product/:productId", checkIfAuthenticated, deleteProduct);
 
 module.exports = {
   adminRoutes: router,
