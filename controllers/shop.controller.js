@@ -3,6 +3,7 @@ const Order = require("../models/order.model");
 const User = require("../models/user.model");
 const path = require("path");
 const fs = require("fs");
+const PDFDocument = require("pdfkit");
 
 const getProductsPage = (req, res) => {
   Product.findAll()
@@ -252,34 +253,48 @@ const getInvoice = (req, res, next) => {
       if (!order) {
         return next(new Error("No order found"));
       }
-      if (!order.userId.toString() !== req.user._id.toString()) {
+      if (order.dataValues.userId !== req.session.user._id) {
         return next(new Error("Unauthorized"));
       }
+      return order.getProducts();
+    })
+    .then((products) => {
+      if (!products) next(new Error("Server Error"));
 
       const invoiceName = "invoice-" + orderId + ".pdf";
       const invoicePath = path.join("data", "invoices", invoiceName);
 
-      // fs.readFile(invoicePath, (err, data) => {
-      //   if (err) {
-      //     return next(err);
-      //   }
-      //   res.setHeader("Content-Type", "application/pdf");
-      //   res.setHeader(
-      //     "Content-Disposition",
-      //     'inline: filename="' + invoiceName + '"'
-      //   );
-      //   res.send(data);
-      // });
+      const pdfDoc = new PDFDocument();
 
-      const file = fs.createReadStream(invoicePath);
+      pdfDoc.pipe(fs.createWriteStream(invoicePath));
+      pdfDoc.pipe(res);
+
+      pdfDoc.fontSize(25).text("Invoice", { underline: true });
+      pdfDoc.text("--------------------------------");
+      let totalPrice = 0;
+      console.log(products[0].dataValues.orderItem);
+      products.forEach((product) => {
+        totalPrice = totalPrice + product.orderItem.quantity * product.price;
+        pdfDoc
+          .fontSize(14)
+          .text(
+            product.title +
+              " - " +
+              product.orderItem.quantity +
+              " x " +
+              "$" +
+              product.price
+          );
+      });
+      pdfDoc.text("--------------------------------");
+      pdfDoc.fontSize(20).text("Total Price: " + "$" + totalPrice);
+      pdfDoc.end();
       res.setHeader("Content-Type", "application/pdf");
       res.setHeader(
         "Content-Disposition",
         'inline: filename="' + invoiceName + '"'
       );
-      file.pipe(res);
     })
-
     .catch((err) => next(err));
 };
 

@@ -9,6 +9,10 @@ const OrderItem = sequelize.define("orderItem", {
     allowNull: false,
     primaryKey: true,
   },
+  quantity: {
+    type: Sequelize.FLOAT,
+    allowNull: false,
+  },
 });
 
 module.exports = OrderItem;

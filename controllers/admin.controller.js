@@ -2,6 +2,8 @@ const Product = require("../models/product.model");
 const User = require("../models/user.model");
 const { validationResult } = require("express-validator");
 
+const deleteFile = require("../util/file");
+
 const getAddProductPage = (req, res) => {
   res.render("admin/edit-product", {
     pageTitle: "Add Products",
@@ -40,6 +42,7 @@ const postEditProduct = (req, res, next) => {
       product.description = description;
 
       if (image) {
+        deleteFile(product.imageUrl);
         product.imageUrl = image.path;
       }
       return product.save().then(() => {
@@ -154,6 +157,7 @@ const deleteProduct = async (req, res, next) => {
       else
         return product.destroy().then(() => {
           console.log("Product deleted");
+          deleteFile(product.imageUrl);
           res.redirect("/admin/product-admin");
         });
     })
