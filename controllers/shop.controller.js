@@ -4,6 +4,7 @@ const User = require("../models/user.model");
 const path = require("path");
 const fs = require("fs");
 const PDFDocument = require("pdfkit");
+const stripe = require("stripe")(process.env.STRIPE_API_KEY);
 
 const ITEM_PER_PAGE = 1;
 
@@ -134,11 +135,59 @@ const postCart = async (req, res) => {
     });
 };
 
-const getCheckoutPage = (req, res) => {
-  res.render("shop/checkout", {
-    pageTitle: "My Checkout",
-    path: "/checkout",
-  });
+const getCheckoutPage = (req, res, next) => {
+  const currentUser = User.build(req.session.user);
+  let totalPrice = 0;
+  let fetchedProducts = 0;
+  currentUser
+    .getCart()
+    .then((cart) => {
+      return cart
+        .getProducts()
+        .then((products) => {
+          fetchedProducts = products;
+          products.forEach(
+            (p) => (totalPrice += p.cartItem.quantity * p.price)
+          );
+
+          return stripe.checkout.sessions.create({
+            payment_method_types: ["card"],
+            line_items: products.map((p) => {
+              return {
+                name: p.title,
+                description: p.description,
+                amount: p.price * 100,
+                currency: "usd",
+                quantity: p.cartItem.quantity,
+              };
+            }),
+            success_url:
+              req.protocol + "://" + req.get("host") + "/checkout/sucess",
+            cancel_url:
+              req.protocol + "://" + req.get("host") + "/checkout/cancel",
+          });
+        })
+        .then((session) => {
+          res.render("shop/checkout", {
+            pageTitle: "My Checkout",
+            path: "/checkout",
+            products: fetchedProducts,
+            totalPrice,
+            sessionId: session.id,
+          });
+        })
+        .catch((err) => {
+          const error = new Error(err);
+          error.httpsStatusCode = 500;
+          return next(error);
+        });
+    })
+    .catch((err) => {
+      console.log(err);
+      const error = new Error(err);
+      error.httpsStatusCode = 500;
+      return next(error);
+    });
 };
 
 const getOrderPage = (req, res) => {
