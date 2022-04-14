@@ -3,7 +3,6 @@ const express = require("express");
 const {
   getCartPage,
   getCheckoutPage,
-  getIndexPage,
   getProductsPage,
   getOrderPage,
   getProductPage,
@@ -17,7 +16,6 @@ const {
 const { checkIfAuthenticated } = require("../middleware/is-auth");
 
 const router = express.Router();
-router.get("/", getIndexPage);
 
 router.get("/cart", checkIfAuthenticated, getCartPage);
 
@@ -31,10 +29,8 @@ router.get("/products/:productId", getProductPage);
 
 router.post("/cart-delete-item", checkIfAuthenticated, postCartDeleteProduct);
 
-router.get("/checkout", checkIfAuthenticated, getCheckoutPage);
-
 router.get("/checkout/success", checkIfAuthenticated, postOrder);
-router.get("/checkout/cancel", checkIfAuthenticated, getCheckoutPage);
+// router.get("/checkout/cancel", checkIfAuthenticated, getCheckoutPage);
 router.get("/orders", checkIfAuthenticated, getOrderPage);
 
 router.get("/orders/:orderId", checkIfAuthenticated, getInvoice);
