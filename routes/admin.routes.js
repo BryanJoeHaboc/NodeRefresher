@@ -1,9 +1,6 @@
 const express = require("express");
 
 const {
-  getAddProductPage,
-  getProductsAdminPage,
-  getEditProductPage,
   postAddProductPage,
   postEditProduct,
   deleteProduct,
@@ -18,21 +15,11 @@ const {
 
 const router = express.Router();
 
-router.get("/add-product", checkIfAuthenticated, getAddProductPage);
-
 router.post(
   "/add-product",
   checkIfAuthenticated,
   postAddProductValidator,
   postAddProductPage
-);
-
-router.get("/product-admin", checkIfAuthenticated, getProductsAdminPage);
-
-router.get(
-  "/edit-product/:productId&:editing",
-  checkIfAuthenticated,
-  getEditProductPage
 );
 
 router.post(
