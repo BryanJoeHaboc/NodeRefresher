@@ -98,7 +98,15 @@ app.use(authRoutes);
 app.get("/500", get500Page);
 app.use(get404Page);
 
-// app.use((error, req, res, next) => {});
+app.use((error, req, res, next) => {
+  const { message, statusCode } = error;
+
+  if (!statusCode) {
+    statusCode = 500;
+  }
+  console.log(message);
+  res.status(statusCode).send({ message });
+});
 
 sequelize
   // .sync({ force: true })

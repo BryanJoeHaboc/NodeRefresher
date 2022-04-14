@@ -4,6 +4,15 @@ const { validationResult } = require("express-validator");
 
 const deleteFile = require("../util/file");
 
+const passToErrorMiddleware = (err, next) => {
+  console.log("err", err);
+  if (!err.statusCode) {
+    err.statusCode = 500;
+  }
+  next(err);
+};
+//----------------------------------------------------CONTROLLERS----------------------------------------------
+
 const postEditProduct = async (req, res, next) => {
   const { productId, title, price, description } = req.body;
 
@@ -35,10 +44,7 @@ const postEditProduct = async (req, res, next) => {
     }
     res.status(200).send({ message: "Product edited succesfully", product });
   } catch (err) {
-    console.log(err);
-    const error = new Error(err);
-    error.httpsStatusCode = 500;
-    return next(error);
+    passToErrorMiddleware(err, next);
   }
 };
 
@@ -67,10 +73,7 @@ const postAddProductPage = async (req, res, next) => {
 
     res.status(201).send({ message: "Product created!" }, product);
   } catch (err) {
-    console.log("error at postAddProduct", err);
-    const error = new Error(err);
-    error.httpsStatusCode = 500;
-    return next(error);
+    passToErrorMiddleware(err, next);
   }
 };
 
@@ -92,7 +95,7 @@ const deleteProduct = async (req, res, next) => {
       res.status(200).json({ message: '"Product Deleted!"' });
     }
   } catch (err) {
-    res.status(500).send("Error deleting the product");
+    passToErrorMiddleware(err, next);
   }
 };
 

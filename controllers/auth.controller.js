@@ -28,6 +28,16 @@ const getErrorMessage = (req) => {
   return errorMessage;
 };
 
+const passToErrorMiddleware = (err, next) => {
+  console.log("err", err);
+  if (!err.statusCode) {
+    err.statusCode = 500;
+  }
+  next(err);
+};
+
+//----------------------------------------------------CONTROLLERS----------------------------------------------
+
 const postLogin = async (req, res) => {
   const { email, password } = req.body;
 
@@ -62,10 +72,7 @@ const postLogin = async (req, res) => {
     const token = "";
     res.send({ message: "Successfully logged in", token });
   } catch (err) {
-    console.log(err);
-    const error = new Error(err);
-    error.httpsStatusCode = 500;
-    return next(error);
+    passToErrorMiddleware(err, next);
   }
 };
 
@@ -106,54 +113,47 @@ const postSignUp = async (req, res, next) => {
 
     res.status(201).send({ message: "User created!" });
   } catch (err) {
-    console.log(err);
-    const error = new Error(err);
-    error.httpsStatusCode = 500;
-    next(error);
+    passToErrorMiddleware(err, next);
   }
 };
 
-const postResetPassword = (req, res) => {
-  crypto.randomBytes(32, (err, buffer) => {
-    if (err) {
-      return res.redirect("/reset");
-    }
-    const token = buffer.toString("hex");
-    User.findOne({ where: { email: req.body.email } })
-      .then((user) => {
-        if (!user) {
-          req.flash("error", "No account with that email found");
-          return res.rediect("reset");
-        }
-
-        return User.update(
-          {
-            resetToken: token,
-            resetTokenExpirationDate: Date.now() + 3600000,
-          },
-          { where: { _id: user._id } }
-        );
-      })
-      .then((result) => {
-        console.log(result);
-        res.redirect("/");
-        //NOTE: HINDI PA GUMAGANA TO KASI UNDER REVIEW PA SENDGRID KO 4-1-2022
-        transporter.sendMail({
-          from: "someemail@example.com",
-          to: req.body.email,
-          subject: "Password Reset",
-          html: `<p>You requested a password reset</p>
-          <p>Click this <a href="http://localhost:3000/reset/${token} ">link</a> to set a new password</p>
-          <p>This reset email is only valid for one hour</p>`,
-        });
-      })
-      .catch((err) => {
-        console.log(err);
-        const error = new Error(err);
-        error.httpsStatusCode = 500;
-        return next(error);
+const postResetPassword = async (req, res, next) => {
+  try {
+    crypto.randomBytes(32, (err, buffer) => {
+      if (err) {
+        const error = new Error('Server Error');
+        throw error
+      }
+      const token = buffer.toString("hex");
+      const user = await User.findOne({ where: { email: req.body.email } });
+      
+      if (!user) {
+        const error = new Error('No user found associated with that email');
+        error.statusCode = 404;
+        throw error
+      }
+  
+      await User.update(
+        {
+          resetToken: token,
+          resetTokenExpirationDate: Date.now() + 3600000,
+        },
+        { where: { _id: user._id } }
+      );
+  
+      transporter.sendMail({
+        from: "someemail@example.com",
+        to: req.body.email,
+        subject: "Password Reset",
+        html: `<p>You requested a password reset</p>
+        <p>Click this <a href="http://localhost:3000/reset/${token} ">link</a> to set a new password</p>
+        <p>This reset email is only valid for one hour</p>`,
       });
-  });
+    })
+  } catch (err) {
+    passToErrorMiddleware(err,next)
+  }
+
 };
 
 //NOTE: HINDI PA GUMAGANA TO KASI UNDER REVIEW PA SENDGRID KO 4-1-2022
@@ -193,9 +193,7 @@ const postNewPassword = async (req, res, next) => {
       { where: { _id: userId, resetToken: passwordToken } }
     );
   } catch (err) {
-    const error = new Error(err);
-    error.httpsStatusCode = 500;
-    next(error);
+    passToErrorMiddleware(err, next);
   }
 };
 
