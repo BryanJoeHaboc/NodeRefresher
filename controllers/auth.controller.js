@@ -28,161 +28,89 @@ const getErrorMessage = (req) => {
   return errorMessage;
 };
 
-const getLogin = (req, res) => {
-  const errorMessage = getErrorMessage(req);
-
-  res.render("auth/login", {
-    pageTitle: "Login",
-    path: "/login",
-    isLoggedIn: false,
-    errorMessage,
-    oldInput: { email: "", password: "" },
-    validationErrors: [],
-  });
-};
-
-const postLogin = (req, res) => {
+const postLogin = async (req, res) => {
   const { email, password } = req.body;
 
-  const errors = validationResult(req);
+  try {
+    const errors = validationResult(req);
 
-  if (!errors.isEmpty()) {
-    return res.status(422).render("auth/login", {
-      pageTitle: "Login",
-      path: "/login",
-      isLoggedIn: false,
-      errorMessage: errors.array()[0].msg,
-      oldInput: { email, password },
-      validationErrors: errors.array(),
+    if (!errors.isEmpty()) {
+      const error = new Error("Invalid input");
+      error.statusCode = 422;
+      throw error;
+    }
+
+    const user = await User.findOne({
+      raw: true,
+      nest: true,
+      where: { email },
     });
+
+    if (!user) {
+      const error = new Error("Invalid email or password");
+      error.statusCode = 422;
+      throw error;
+    }
+
+    const doMatch = await bcrypt.compare(password, user.password);
+
+    if (!doMatch) {
+      const error = new Error("Invalid User Password");
+      error.statusCode = 422;
+      throw error;
+    }
+    const token = "";
+    res.send({ message: "Successfully logged in", token });
+  } catch (err) {
+    console.log(err);
+    const error = new Error(err);
+    error.httpsStatusCode = 500;
+    return next(error);
   }
-
-  User.findOne({ raw: true, nest: true, where: { email } })
-    .then((user) => {
-      if (!user) {
-        return res.status(422).render("auth/login", {
-          pageTitle: "Login",
-          path: "/login",
-          isLoggedIn: false,
-          errorMessage: "Invalid email or password",
-          oldInput: { email, password },
-          validationErrors: [],
-        });
-      }
-
-      bcrypt
-        .compare(password, user.password)
-        .then((doMatch) => {
-          if (doMatch) {
-            req.session.isLoggedIn = true;
-            req.session.user = user;
-            return res.redirect("/");
-          }
-          return res.status(422).render("auth/login", {
-            pageTitle: "Login",
-            path: "/login",
-            isLoggedIn: false,
-            errorMessage: "Invalid email or password",
-            oldInput: { email, password },
-            validationErrors: [],
-          });
-        })
-        .catch((err) => {
-          console.log("error in dehashing", err);
-          return res.status(422).render("auth/login", {
-            pageTitle: "Login",
-            path: "/login",
-            isLoggedIn: false,
-            errorMessage: "Invalid email or password",
-            oldInput: { email, password },
-            validationErrors: [],
-          });
-        });
-    })
-    .catch((err) => {
-      console.log(err);
-      const error = new Error(err);
-      error.httpsStatusCode = 500;
-      return next(error);
-    });
 };
 
-const postLogout = (req, res) => {
-  req.session.destroy(() => {
-    res.redirect("/");
-  });
-};
-
-const postSignUp = (req, res) => {
+const postSignUp = async (req, res, next) => {
   const { firstName, lastName, email, password, confirmPassword } = req.body;
 
-  const errors = validationResult(req);
+  try {
+    if (confirmPassword !== password) {
+      const error = new Error("Password and confirm password must be equal");
+      error.statusCode = 422;
+      throw error;
+    }
 
-  if (!errors.isEmpty()) {
-    return res.status(422).render("auth/signup", {
-      pageTitle: "Login",
-      path: "/signup",
-      isLoggedIn: false,
-      errorMessage: errors.array()[0].msg,
-      oldInput: { email, password, confirmPassword, firstName, lastName },
-      validationErrors: errors.array(),
-    });
-  }
+    const errors = validationResult(req);
 
-  bcrypt.hash(password, 12).then((hashPassword) => {
-    return User.create({
+    if (!errors.isEmpty()) {
+      const error = new Error("Invalid user");
+      error.statusCode = 422;
+      throw error;
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 12);
+
+    const user = await User.create({
       firstName,
       lastName,
       email,
-      password: hashPassword,
-    })
-      .then((user) => {
-        user.createCart().then((result) => {
-          res.redirect("/login");
-          //NOTE: HINDI PA GUMAGANA TO KASI UNDER REVIEW PA SENDGRID KO 4-1-2022
-          transporter.sendMail({
-            from: process.env.SENDGRID_EMAIL,
-            to: email,
-            subject: "Signup succeeded",
-            html: "<h1> You successfully signed up! </h1>",
-          });
-        });
-      })
-      .catch((err) => {
-        console.log(err);
-        const error = new Error(err);
-        error.httpsStatusCode = 500;
-        return next(error);
-      });
-  });
-};
+      password: hashedPassword,
+    });
+    await user.createCart();
+    //NOTE: HINDI PA GUMAGANA TO KASI UNDER REVIEW PA SENDGRID KO 4-1-2022
+    transporter.sendMail({
+      from: process.env.SENDGRID_EMAIL,
+      to: email,
+      subject: "Signup succeeded",
+      html: "<h1> You successfully signed up! </h1>",
+    });
 
-const getSignUp = (req, res) => {
-  const errorMessage = getErrorMessage(req);
-  res.render("auth/signup", {
-    pageTitle: "SignUp",
-    path: "/signup",
-    isLoggedIn: false,
-    errorMessage,
-    oldInput: {
-      email: "",
-      password: "",
-      confirmPassword: "",
-      firstName: "",
-      lastName: "",
-    },
-    validationErrors: [],
-  });
-};
-
-const getResetPassword = (req, res) => {
-  const errorMessage = getErrorMessage(req);
-  res.render("auth/password-reset", {
-    pageTitle: "Reset Password",
-    path: "/reset",
-    isLoggedIn: false,
-    errorMessage,
-  });
+    res.status(201).send({ message: "User created!" });
+  } catch (err) {
+    console.log(err);
+    const error = new Error(err);
+    error.httpsStatusCode = 500;
+    next(error);
+  }
 };
 
 const postResetPassword = (req, res) => {
@@ -229,68 +157,50 @@ const postResetPassword = (req, res) => {
 };
 
 //NOTE: HINDI PA GUMAGANA TO KASI UNDER REVIEW PA SENDGRID KO 4-1-2022
-const getNewPassword = (req, res, next) => {
-  const resetToken = req.params.token;
-  User.findOne({
-    where: {
-      [Op.and]: [
-        {
-          resetToken,
-        },
-        {
-          resetTokenExpirationDate: {
-            [Op.gte]: Date.now(),
+
+const postNewPassword = async (req, res, next) => {
+  try {
+    const resetToken = req.params.token;
+    const user = await User.findOne({
+      where: {
+        [Op.and]: [
+          {
+            resetToken,
           },
-        },
-      ],
-    },
-  }).then((user) => {
-    const errorMessage = getErrorMessage(req);
-
-    res.render("auth/new-password", {
-      path: "/new-password",
-      pageTitle: "New Password",
-      errorMessage,
-      isLoggedIn: false,
-      userId: user._id.toString(),
-      passwordToken: resetToken,
+          {
+            resetTokenExpirationDate: {
+              [Op.gte]: Date.now(),
+            },
+          },
+        ],
+      },
     });
-  });
-};
 
-const postNewPassword = (req, res, next) => {
-  const { newPassword, userId, passwordToken } = req.body;
-  let currentUser;
-  bcrypt
-    .hash(newPassword, 12)
-    .then((hashedPassword) => {
-      return User.update(
-        {
-          resetToken: undefined,
-          resetTokenExpirationDate: undefined,
-          password: hashedPassword,
-        },
-        { where: { _id: userId, resetToken: passwordToken } }
-      );
-    })
-    .then((result) => {
-      res.redirect("/login");
-    })
-    .catch((err) => {
-      console.log(err);
-      const error = new Error(err);
-      error.httpsStatusCode = 500;
-      return next(error);
-    });
+    if (user) {
+      const error = new Error("Invalid token");
+      error.statuCode = 422;
+      throw error;
+    }
+
+    const { newPassword, userId, passwordToken } = req.body;
+    const hashedPassword = await bcrypt.hash(newPassword, 12);
+    await User.update(
+      {
+        resetToken: undefined,
+        resetTokenExpirationDate: undefined,
+        password: hashedPassword,
+      },
+      { where: { _id: userId, resetToken: passwordToken } }
+    );
+  } catch (err) {
+    const error = new Error(err);
+    error.httpsStatusCode = 500;
+    next(error);
+  }
 };
 
 module.exports = {
-  getLogin,
-  getSignUp,
-  getResetPassword,
-  getNewPassword,
   postLogin,
-  postLogout,
   postSignUp,
   postResetPassword,
   postNewPassword,
