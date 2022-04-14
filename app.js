@@ -35,7 +35,6 @@ const fileStorage = multer.diskStorage({
   filename: (req, file, cb) => {
     const fileName =
       new Date().toISOString().split(":").join("-") + file.originalname;
-    console.log(fileName);
     cb(null, fileName);
   },
 });
