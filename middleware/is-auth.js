@@ -8,7 +8,7 @@ const passToErrorMiddleware = (err, next) => {
   next(err);
 };
 
-const checkIfAuthenticated = (req, res, next) => {
+async function checkIfAuthenticated(req, res, next) {
   try {
     const authHeader = req.get("Authorization");
 
@@ -28,14 +28,12 @@ const checkIfAuthenticated = (req, res, next) => {
       error.statusCode = 401;
       throw error;
     }
-
-    req.userId = decodedToken.userId;
   } catch (err) {
     passToErrorMiddleware(err, next);
   }
 
   next();
-};
+}
 
 module.exports = {
   checkIfAuthenticated,

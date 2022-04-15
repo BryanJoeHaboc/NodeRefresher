@@ -40,7 +40,7 @@ const getProductsPage = async (req, res, next) => {
 
 const getCartPage = async (req, res) => {
   try {
-    const currentUser = User.build(req.session.user);
+    const currentUser = User.findByPk(req.userId);
     const cart = await currentUser.getCart();
 
     if (!cart) {
@@ -61,7 +61,7 @@ const postCart = async (req, res) => {
 
     let newQuantity = 1;
 
-    const currentUser = User.build(req.session.user);
+     const currentUser = User.findByPk(req.userId);
     const cart = await currentUser.getCart();
 
     if (!cart) {
@@ -94,7 +94,7 @@ const postCart = async (req, res) => {
 };
 
 // const getCheckoutPage = (req, res, next) => {
-//   const currentUser = User.build(req.session.user);
+//    const currentUser = User.findByPk(req.userId);
 //   let totalPrice = 0;
 //   let fetchedProducts = 0;
 //   currentUser
@@ -149,7 +149,7 @@ const postCart = async (req, res) => {
 // };
 
 const getOrderPage = async (req, res, next) => {
-  const currentUser = User.build(req.session.user);
+   const currentUser = User.findByPk(req.userId);
 
   try {
     const orders = await currentUser.getOrders({ include: ["products"] });
@@ -187,7 +187,7 @@ const postCartDeleteProduct = async (req, res, next) => {
   try {
     const prodId = req.body.productId;
 
-    const currentUser = User.build(req.session.user);
+     const currentUser = User.findByPk(req.userId);
 
     const cart = await currentUser.getCart();
 
@@ -215,7 +215,7 @@ const postCartDeleteProduct = async (req, res, next) => {
 
 const postOrder = (req, res) => {
   let fetchedCart;
-  const currentUser = User.build(req.session.user);
+   const currentUser = User.findByPk(req.userId);
 
   try {
     const cart = await currentUser.getCart();
@@ -254,7 +254,7 @@ const postSubtractCart = async (req, res, next) => {
  try{
   const prodId = req.body.productId;
 
-  const currentUser = User.build(req.session.user);
+   const currentUser = User.findByPk(req.userId);
   let fetchedCart = [];
 
   const cart = await currentUser.getCart()
@@ -292,7 +292,7 @@ const getInvoice = async (req, res, next) => {
       error.statusCode = 404
       throw error
     }
-    if (order.dataValues.userId !== req.session.user._id) {
+    if (order.dataValues.userId !== req.userId) {
       const error = new Error("Unauthorized");
       error.statusCode = 401
       throw error

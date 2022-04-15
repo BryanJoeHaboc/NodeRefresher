@@ -28,7 +28,7 @@ const postEditProduct = async (req, res, next) => {
 
     const product = await Product.findByPk(productId);
 
-    if (product.userId !== req.session.user._id) {
+    if (product.userId !== req.userId) {
       const error = new Error("Unauthorize Request");
       error.statusCode = 401;
       throw error;
@@ -62,7 +62,7 @@ const postAddProductPage = async (req, res, next) => {
 
     const imageUrl = image.path;
 
-    const currentUser = User.build(req.session.user);
+    const currentUser = User.build(req.userId);
 
     const product = await currentUser.createProduct({
       title: title,
@@ -84,7 +84,7 @@ const deleteProduct = async (req, res, next) => {
 
     const product = await Product.findByPk(productId);
 
-    if (product.userId !== req.session.user._id) {
+    if (product.userId !== req.userId) {
       const error = new Error("Unauthorize Request");
       error.statusCode = 401;
       throw error;
