@@ -6,6 +6,7 @@ const crypto = require("crypto");
 const sendgridTransport = require("nodemailer-sendgrid-transport");
 const { Op } = require("sequelize");
 const { validationResult } = require("express-validator");
+const jwt = require('jsonwebtoken')
 
 const User = require("../models/user.model");
 
@@ -69,7 +70,15 @@ const postLogin = async (req, res) => {
       error.statusCode = 422;
       throw error;
     }
-    const token = "";
+    const token = jwt.sign(
+      {
+        email: user.email,
+        userId: user._id,
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: "1h" }
+    );
+    console.log(token);
     res.send({ message: "Successfully logged in", token });
   } catch (err) {
     passToErrorMiddleware(err, next);
