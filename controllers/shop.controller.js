@@ -61,7 +61,7 @@ const postCart = async (req, res) => {
 
     let newQuantity = 1;
 
-     const currentUser = User.findByPk(req.userId);
+    const currentUser = User.findByPk(req.userId);
     const cart = await currentUser.getCart();
 
     if (!cart) {
@@ -149,7 +149,7 @@ const postCart = async (req, res) => {
 // };
 
 const getOrderPage = async (req, res, next) => {
-   const currentUser = User.findByPk(req.userId);
+  const currentUser = User.findByPk(req.userId);
 
   try {
     const orders = await currentUser.getOrders({ include: ["products"] });
@@ -187,7 +187,7 @@ const postCartDeleteProduct = async (req, res, next) => {
   try {
     const prodId = req.body.productId;
 
-     const currentUser = User.findByPk(req.userId);
+    const currentUser = User.findByPk(req.userId);
 
     const cart = await currentUser.getCart();
 
@@ -213,72 +213,71 @@ const postCartDeleteProduct = async (req, res, next) => {
   }
 };
 
-const postOrder = (req, res) => {
+const postOrder = async (req, res) => {
   let fetchedCart;
-   const currentUser = User.findByPk(req.userId);
+  const currentUser = User.findByPk(req.userId);
 
   try {
     const cart = await currentUser.getCart();
 
-  if (!cart) {
-    const error = new Error("Server error");
-    throw error;
-  }
+    if (!cart) {
+      const error = new Error("Server error");
+      throw error;
+    }
 
-  const products = await cart.getProducts();
+    const products = await cart.getProducts();
 
-  if (!products) {
-    const error = new Error("No product found!");
-    error.statusCode = 404;
-    throw error;
-  }
+    if (!products) {
+      const error = new Error("No product found!");
+      error.statusCode = 404;
+      throw error;
+    }
 
-  const order = await currentUser.createOrder()
+    const order = await currentUser.createOrder();
 
-  await order.addProducts(
-    products.map((product) => {
-      product.orderItem = { quantity: product.cartItem.quantity };
-      return product;
-    })
-  )
+    await order.addProducts(
+      products.map((product) => {
+        product.orderItem = { quantity: product.cartItem.quantity };
+        return product;
+      })
+    );
 
-  await fetchedCart.setProducts(null);
+    await fetchedCart.setProducts(null);
 
-  res.send({message: 'Order succeeded'})
+    res.send({ message: "Order succeeded" });
   } catch (err) {
-    passToErrorMiddleware(err,next)
+    passToErrorMiddleware(err, next);
   }
 };
 
 const postSubtractCart = async (req, res, next) => {
- try{
-  const prodId = req.body.productId;
+  try {
+    const prodId = req.body.productId;
 
-   const currentUser = User.findByPk(req.userId);
-  let fetchedCart = [];
+    const currentUser = User.findByPk(req.userId);
+    let fetchedCart = [];
 
-  const cart = await currentUser.getCart()
-  const product =  cart.getProducts({ where: { _id: prodId } });
+    const cart = await currentUser.getCart();
+    const product = cart.getProducts({ where: { _id: prodId } });
 
-  const cartItem = product[0].cartItem;
-      let { quantity } = product[0].cartItem;
-      if (quantity === 1) {
-        return product[0].cartItem.destroy();
-      } else {
-        quantity = quantity - 1;
-      }
-      cartItem.quantity = quantity;
-      console.log(cartItem.quantity);
+    const cartItem = product[0].cartItem;
+    let { quantity } = product[0].cartItem;
+    if (quantity === 1) {
+      return product[0].cartItem.destroy();
+    } else {
+      quantity = quantity - 1;
+    }
+    cartItem.quantity = quantity;
+    console.log(cartItem.quantity);
 
-      await fetchedCart.addProduct(product, {
-        through: { quantity: cartItem.quantity },
-      });
+    await fetchedCart.addProduct(product, {
+      through: { quantity: cartItem.quantity },
+    });
 
-      res.send({message: 'Item subtracted'})
- } catch (err) {
-  passToErrorMiddleware(err,next)
- }
-
+    res.send({ message: "Item subtracted" });
+  } catch (err) {
+    passToErrorMiddleware(err, next);
+  }
 };
 
 const getInvoice = async (req, res, next) => {
@@ -289,61 +288,58 @@ const getInvoice = async (req, res, next) => {
 
     if (!order) {
       const error = new Error("No order found");
-      error.statusCode = 404
-      throw error
+      error.statusCode = 404;
+      throw error;
     }
     if (order.dataValues.userId !== req.userId) {
       const error = new Error("Unauthorized");
-      error.statusCode = 401
-      throw error
+      error.statusCode = 401;
+      throw error;
     }
-  
-    const products  = order.getProducts();
-  
+
+    const products = order.getProducts();
+
     if (!products) {
-      const error = new Error('Server Error')
-      throw error
+      const error = new Error("Server Error");
+      throw error;
     }
-  
-  
-        const invoiceName = "invoice-" + orderId + ".pdf";
-        const invoicePath = path.join("data", "invoices", invoiceName);
-  
-        const pdfDoc = new PDFDocument();
-  
-        pdfDoc.pipe(fs.createWriteStream(invoicePath));
-        pdfDoc.pipe(res);
-  
-        pdfDoc.fontSize(25).text("Invoice", { underline: true });
-        pdfDoc.text("--------------------------------");
-        let totalPrice = 0;
-        console.log(products[0].dataValues.orderItem);
-        products.forEach((product) => {
-          totalPrice = totalPrice + product.orderItem.quantity * product.price;
-          pdfDoc
-            .fontSize(14)
-            .text(
-              product.title +
-                " - " +
-                product.orderItem.quantity +
-                " x " +
-                "$" +
-                product.price
-            );
-        });
-        pdfDoc.text("--------------------------------");
-        pdfDoc.fontSize(20).text("Total Price: " + "$" + totalPrice);
-        pdfDoc.end();
-        res.setHeader("Content-Type", "application/pdf");
-        res.setHeader(
-          "Content-Disposition",
-          'inline: filename="' + invoiceName + '"'
+
+    const invoiceName = "invoice-" + orderId + ".pdf";
+    const invoicePath = path.join("data", "invoices", invoiceName);
+
+    const pdfDoc = new PDFDocument();
+
+    pdfDoc.pipe(fs.createWriteStream(invoicePath));
+    pdfDoc.pipe(res);
+
+    pdfDoc.fontSize(25).text("Invoice", { underline: true });
+    pdfDoc.text("--------------------------------");
+    let totalPrice = 0;
+    console.log(products[0].dataValues.orderItem);
+    products.forEach((product) => {
+      totalPrice = totalPrice + product.orderItem.quantity * product.price;
+      pdfDoc
+        .fontSize(14)
+        .text(
+          product.title +
+            " - " +
+            product.orderItem.quantity +
+            " x " +
+            "$" +
+            product.price
         );
-  
+    });
+    pdfDoc.text("--------------------------------");
+    pdfDoc.fontSize(20).text("Total Price: " + "$" + totalPrice);
+    pdfDoc.end();
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader(
+      "Content-Disposition",
+      'inline: filename="' + invoiceName + '"'
+    );
   } catch (err) {
-    passToErrorMiddleware(err,next)
+    passToErrorMiddleware(err, next);
   }
-  
 };
 
 module.exports = {

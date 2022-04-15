@@ -6,7 +6,7 @@ const crypto = require("crypto");
 const sendgridTransport = require("nodemailer-sendgrid-transport");
 const { Op } = require("sequelize");
 const { validationResult } = require("express-validator");
-const jwt = require('jsonwebtoken')
+const jwt = require("jsonwebtoken");
 
 const User = require("../models/user.model");
 
@@ -39,7 +39,7 @@ const passToErrorMiddleware = (err, next) => {
 
 //----------------------------------------------------CONTROLLERS----------------------------------------------
 
-const postLogin = async (req, res) => {
+const postLogin = async (req, res, next) => {
   const { email, password } = req.body;
 
   try {
@@ -126,30 +126,30 @@ const postSignUp = async (req, res, next) => {
   }
 };
 
+//NOTE: tinanggal ko await dito kasi nag loloko
 const postResetPassword = async (req, res, next) => {
   try {
     crypto.randomBytes(32, (err, buffer) => {
       if (err) {
-        const error = new Error('Server Error');
-        throw error
+        const error = new Error("Server Error");
+        throw error;
       }
       const token = buffer.toString("hex");
-      const user = await User.findOne({ where: { email: req.body.email } });
-      
+      // dito sa part na to
+      const user = User.findOne({ where: { email: req.body.email } });
       if (!user) {
-        const error = new Error('No user found associated with that email');
+        const error = new Error("No user found associated with that email");
         error.statusCode = 404;
-        throw error
+        throw error;
       }
-  
-      await User.update(
+      // dito sa part na to
+      User.update(
         {
           resetToken: token,
           resetTokenExpirationDate: Date.now() + 3600000,
         },
         { where: { _id: user._id } }
       );
-  
       transporter.sendMail({
         from: "someemail@example.com",
         to: req.body.email,
@@ -158,11 +158,10 @@ const postResetPassword = async (req, res, next) => {
         <p>Click this <a href="http://localhost:3000/reset/${token} ">link</a> to set a new password</p>
         <p>This reset email is only valid for one hour</p>`,
       });
-    })
+    });
   } catch (err) {
-    passToErrorMiddleware(err,next)
+    passToErrorMiddleware(err, next);
   }
-
 };
 
 //NOTE: HINDI PA GUMAGANA TO KASI UNDER REVIEW PA SENDGRID KO 4-1-2022
