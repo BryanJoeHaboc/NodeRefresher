@@ -3,8 +3,6 @@ require("dotenv").config({ path: "./.env" });
 const express = require("express");
 const path = require("path");
 const bodyParser = require("body-parser");
-const csrf = require("csurf");
-const flash = require("connect-flash");
 const multer = require("multer");
 
 const sequelize = require("./util/database");
@@ -19,14 +17,22 @@ const configSession = require("./config/session");
 const { adminRoutes } = require("./routes/admin.routes");
 const shopRoutes = require("./routes/shop.routes");
 const authRoutes = require("./routes/auth.routes");
-const { get404Page, get500Page } = require("./controllers/error.controller");
 
 const port = process.env.PORT || 5000;
 const app = express();
-const csrfProtection = csrf();
 
-app.set("view engine", "ejs");
-app.set("views", "views");
+app.use((req, res, next) => {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader(
+    "Access-Control-Allow-Methods",
+    "OPTIONS, GET, POST, PUT, PATCH, DELETE"
+  );
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(200);
+  }
+  next();
+});
 
 const fileStorage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -58,10 +64,8 @@ app.use(
 // session
 configSession(app);
 
-// csrf protection
-app.use(csrfProtection);
-
-app.use(flash());
+// csrf protection - only for mvc
+// app.use(csrfProtection);
 
 // find Dummy User
 // app.use((req, res, next) => {
@@ -89,11 +93,8 @@ app.use("/admin", adminRoutes);
 app.use(shopRoutes);
 app.use(authRoutes);
 
-app.get("/500", get500Page);
-app.use(get404Page);
-
 app.use((error, req, res, next) => {
-  const { message, statusCode } = error;
+  let { message, statusCode } = error;
 
   if (!statusCode) {
     statusCode = 500;
@@ -107,7 +108,6 @@ sequelize
   .sync()
   .then((cart) => {
     app.listen(port, () => {
-      console.log("sengrdiapikey", process.env.SENDGRID_API_KEY);
       console.log(`Listening on port ${port}`);
     });
   })
