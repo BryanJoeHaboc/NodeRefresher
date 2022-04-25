@@ -54,6 +54,7 @@ const fileFilter = (req, file, cb) => {
 };
 
 app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
 app.use(multer({ storage: fileStorage, fileFilter }).single("image"));
 app.use(express.static(path.join(__dirname, "public")));
 app.use(
@@ -94,13 +95,13 @@ app.use(shopRoutes);
 app.use(authRoutes);
 
 app.use((error, req, res, next) => {
-  let { message, statusCode } = error;
+  let { message, statusCode, data } = error;
 
   if (!statusCode) {
     statusCode = 500;
   }
   console.log(message);
-  res.status(statusCode).send({ message });
+  res.status(statusCode).send({ message, data });
 });
 
 sequelize

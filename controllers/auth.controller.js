@@ -86,44 +86,48 @@ const postLogin = async (req, res, next) => {
 };
 
 const postSignUp = async (req, res, next) => {
-  const { firstName, lastName, email, password, confirmPassword } = req.body;
-  console.log("signup yey");
-  // try {
-  //   if (confirmPassword !== password) {
-  //     const error = new Error("Password and confirm password must be equal");
-  //     error.statusCode = 422;
-  //     throw error;
-  //   }
+  const { firstName, lastName, email, password, confirmPassword, userType } =
+    req.body;
 
-  //   const errors = validationResult(req);
+  console.log(req.body);
+  try {
+    if (confirmPassword !== password) {
+      const error = new Error("Password and confirm password must be equal");
+      error.statusCode = 422;
+      throw error;
+    }
 
-  //   if (!errors.isEmpty()) {
-  //     const error = new Error("Invalid user");
-  //     error.statusCode = 422;
-  //     throw error;
-  //   }
+    const errors = validationResult(req);
 
-  //   const hashedPassword = await bcrypt.hash(password, 12);
+    if (!errors.isEmpty()) {
+      const error = new Error("Invalid user");
+      error.statusCode = 422;
+      error.data = errors;
+      throw error;
+    }
 
-  //   const user = await User.create({
-  //     firstName,
-  //     lastName,
-  //     email,
-  //     password: hashedPassword,
-  //   });
-  //   await user.createCart();
-  //   //NOTE: HINDI PA GUMAGANA TO KASI UNDER REVIEW PA SENDGRID KO 4-1-2022
-  //   transporter.sendMail({
-  //     from: process.env.SENDGRID_EMAIL,
-  //     to: email,
-  //     subject: "Signup succeeded",
-  //     html: "<h1> You successfully signed up! </h1>",
-  //   });
+    const hashedPassword = await bcrypt.hash(password, 12);
 
-  //   res.status(201).send({ message: "User created!" });
-  // } catch (err) {
-  //   passToErrorMiddleware(err, next);
-  // }
+    const user = await User.create({
+      firstName,
+      lastName,
+      email,
+      password: hashedPassword,
+      userType,
+    });
+    await user.createCart();
+    //NOTE: HINDI PA GUMAGANA TO KASI UNDER REVIEW PA SENDGRID KO 4-1-2022
+    transporter.sendMail({
+      from: process.env.SENDGRID_EMAIL,
+      to: email,
+      subject: "Signup succeeded",
+      html: "<h1> You successfully signed up! </h1>",
+    });
+
+    res.status(201).send({ message: "User created!" });
+  } catch (err) {
+    passToErrorMiddleware(err, next);
+  }
 };
 
 //NOTE: tinanggal ko await dito kasi nag loloko
