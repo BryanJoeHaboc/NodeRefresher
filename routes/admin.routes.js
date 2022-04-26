@@ -4,6 +4,7 @@ const {
   postAddProductPage,
   postEditProduct,
   deleteProduct,
+  postAddProducts,
 } = require("../controllers/admin.controller");
 
 const { checkIfAuthenticated } = require("../middleware/is-auth");
@@ -28,6 +29,8 @@ router.post(
   postEditProductValidator,
   postEditProduct
 );
+
+router.post("/products", checkIfAuthenticated, postAddProducts);
 
 router.delete("/product/:productId", checkIfAuthenticated, deleteProduct);
 

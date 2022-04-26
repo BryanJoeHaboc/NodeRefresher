@@ -99,8 +99,35 @@ const deleteProduct = async (req, res, next) => {
   }
 };
 
+const postAddProducts = async (req, res, next) => {
+  const data = req.body.data;
+  const excelHeaders = data.shift();
+  const products = [];
+
+  for (let i = 0; i < data.length; i++) {
+    const productObj = {};
+
+    for (let j = 0; j < data[i].length; j++) {
+      productObj[excelHeaders[j]] = data[i][j];
+      productObj.description =
+        "Amet Lorem ad ipsum enim nulla occaecat nulla adipisicing do cupidatat elit deserunt officia.";
+    }
+
+    products.push(productObj);
+  }
+
+  try {
+    await Product.bulkCreate(products);
+
+    res.send({ message: "All products added" });
+  } catch (e) {
+    next(e);
+  }
+};
+
 module.exports = {
   postEditProduct,
   postAddProductPage,
   deleteProduct,
+  postAddProducts,
 };

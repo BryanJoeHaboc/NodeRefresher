@@ -78,8 +78,16 @@ const postLogin = async (req, res, next) => {
       process.env.JWT_SECRET,
       { expiresIn: "1h" }
     );
-    console.log(token);
-    res.send({ message: "Successfully logged in", token });
+    res.send({
+      message: "Successfully logged in",
+      token,
+      user: {
+        firstName: user.firstName,
+        lastName: user.lastName,
+        userId: user._id,
+        userType: user.userType,
+      },
+    });
   } catch (err) {
     passToErrorMiddleware(err, next);
   }
