@@ -100,6 +100,11 @@ app.use((error, req, res, next) => {
   if (!statusCode) {
     statusCode = 500;
   }
+
+  if (!data) {
+    data = {};
+  }
+
   console.log(message);
   res.status(statusCode).send({ message, data });
 });

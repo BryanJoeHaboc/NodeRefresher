@@ -22,10 +22,13 @@ const getProductsPage = async (req, res, next) => {
   const offset = ITEM_PER_PAGE * (page - 1);
 
   try {
-    const products = await Product.findAndCountAll({
-      limit: ITEM_PER_PAGE,
-      offset,
-    });
+    const products = await Product
+      .findAndCountAll
+      //   {
+      //   limit: ITEM_PER_PAGE,
+      //   offset,
+      // }
+      ();
     if (!products) {
       const error = new Error("No products found");
       error.statusCode = 404;
