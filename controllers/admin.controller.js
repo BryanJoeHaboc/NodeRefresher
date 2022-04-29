@@ -122,7 +122,7 @@ const postAddProducts = async (req, res, next) => {
 
     res.send({ message: "All products added" });
   } catch (e) {
-    next(e);
+    passToErrorMiddleware(err, next);
   }
 };
 
