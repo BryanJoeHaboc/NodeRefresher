@@ -109,13 +109,14 @@ const postAddProducts = async (req, res, next) => {
 
     for (let j = 0; j < data[i].length; j++) {
       productObj[excelHeaders[j]] = data[i][j];
-      productObj.description =
-        "Amet Lorem ad ipsum enim nulla occaecat nulla adipisicing do cupidatat elit deserunt officia.";
     }
+    productObj.userId = req.body.userId;
 
+    productObj.description =
+      "Amet Lorem ad ipsum enim nulla occaecat nulla adipisicing do cupidatat elit deserunt officia.";
     products.push(productObj);
   }
-
+  console.log(products);
   try {
     await Product.bulkCreate(products);
 

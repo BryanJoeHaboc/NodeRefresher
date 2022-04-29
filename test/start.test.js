@@ -1,5 +1,3 @@
-const { it, test } = require("jest");
-
 const { postSignUp } = require("../controllers/auth.controller");
 
 function createSignUp({
@@ -18,21 +16,18 @@ function createSignUp({
   };
 }
 
-test("Auth Controller", () => {
-  it("throws error if email is invalid format", () => {
-    // const req = {
-    //   body: createSignUp("", "emali.com"),
-    // };
+const res = () => {};
+const next = () => {};
+describe("Auth Controller", () => {
+  it("throws error if password and confirmPassword not equal", () => {
+    const req = {
+      body: createSignUp("", "", "", "pass", "password"),
+    };
 
-    // console.log(req);
-    // expect("");
-
-    // postSignUp();
-
-    function sum(a, b) {
-      return a + b;
-    }
-    module.exports = sum;
+    console.log(req);
+    expect(postSignUp(req, res, next())).toStrictEqual({
+      error: "Password and confirm password must be equal",
+    });
   });
 
   // it("throws error if email already exists", () => {});

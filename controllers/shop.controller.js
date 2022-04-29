@@ -4,6 +4,7 @@ const User = require("../models/user.model");
 const path = require("path");
 const fs = require("fs");
 const PDFDocument = require("pdfkit");
+const e = require("express");
 const stripe = require("stripe")(process.env.STRIPE_API_KEY);
 
 const ITEM_PER_PAGE = 1;
@@ -35,7 +36,32 @@ const getProductsPage = async (req, res, next) => {
       throw error;
     }
 
-    res.send({ totalItem: products.count, products: products.rows });
+    const collections = [];
+    const titles = [];
+
+    products.rows.forEach((product) => {
+      const prodTitle = product.title;
+      const index = titles.findIndex((title) => title === prodTitle);
+
+      if (index < 0) {
+        titles.push(prodTitle);
+        collections[titles.length - 1] = {
+          _id: titles.length,
+          title: prodTitle,
+          routeName: prodTitle.toLowerCase(),
+          items: [],
+        };
+
+        collections[titles.length - 1].items.push(product);
+      } else {
+        collections[index].items.push(product);
+      }
+    });
+
+    res.send({
+      collections,
+      totalItems: products.count,
+    });
   } catch (err) {
     passToErrorMiddleware(err, next);
   }
