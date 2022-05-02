@@ -50,28 +50,31 @@ const postEditProduct = async (req, res, next) => {
 
 const postAddProductPage = async (req, res, next) => {
   req.body._id = null;
-  const { title, description, price } = req.body;
+  const {
+    product: { title, description, price, imageUrl, name },
+  } = req.body;
   const image = req.file;
-
+  //:NOTE: temporarily disable image uploading
   try {
-    if (!image) {
-      const error = new Error("Attached file is not an image");
-      error.statusCode = 422;
-      throw error;
-    }
+    // if (!image) {
+    //   const error = new Error("Attached file is not an image");
+    //   error.statusCode = 422;
+    //   throw error;
+    // }
 
-    const imageUrl = image.path;
+    // const imageUrl = image.path;
 
     const currentUser = User.build(req.userId);
 
     const product = await currentUser.createProduct({
       title: title,
-      price: price,
+      price: parseInt(price),
       imageUrl: imageUrl,
       description: description,
+      name,
     });
 
-    res.status(201).send({ message: "Product created!" }, product);
+    res.status(201).send({ message: "Product created!", product });
   } catch (err) {
     passToErrorMiddleware(err, next);
   }

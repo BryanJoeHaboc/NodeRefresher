@@ -11,7 +11,7 @@ const passToErrorMiddleware = (err, next) => {
 async function checkIfAuthenticated(req, res, next) {
   try {
     const authHeader = req.get("Authorization");
-
+    console.log(req.body);
     if (!authHeader) {
       const error = new Error("Not authenticated");
       error.statusCode = 401;
