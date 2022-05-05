@@ -5,6 +5,7 @@ const {
   postEditProduct,
   deleteProduct,
   postAddProducts,
+  getAdminProducts,
 } = require("../controllers/admin.controller");
 
 const { checkIfAuthenticated } = require("../middleware/is-auth");
@@ -33,6 +34,8 @@ router.post(
 router.post("/products", checkIfAuthenticated, postAddProducts);
 
 router.delete("/product/:productId", checkIfAuthenticated, deleteProduct);
+
+router.get("/products/:userId", checkIfAuthenticated, getAdminProducts);
 
 module.exports = {
   adminRoutes: router,

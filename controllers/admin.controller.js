@@ -13,6 +13,51 @@ const passToErrorMiddleware = (err, next) => {
 };
 //----------------------------------------------------CONTROLLERS----------------------------------------------
 
+const getAdminProducts = async (req, res, next) => {
+  try {
+    const userId = req.params.userId;
+    const products = await Product.findAndCountAll({
+      where: { userId: userId },
+    });
+
+    if (products.length === 0) {
+      const error = new Error("No products found");
+      error.statusCode = 404;
+      throw error;
+    }
+
+    const collections = [];
+    const titles = [];
+
+    products.rows.forEach((product) => {
+      const prodTitle = product.title;
+      const index = titles.findIndex((title) => title === prodTitle);
+
+      if (index < 0) {
+        titles.push(prodTitle);
+        collections[titles.length - 1] = {
+          _id: titles.length,
+          title: prodTitle,
+          routeName: prodTitle.toLowerCase(),
+          items: [],
+        };
+
+        collections[titles.length - 1].items.push(product);
+      } else {
+        collections[index].items.push(product);
+      }
+    });
+
+    res.send({
+      collections,
+      totalItems: products.count,
+    });
+  } catch (error) {
+    console.log("hatdogs");
+    passToErrorMiddleware(error, next);
+  }
+};
+
 const postEditProduct = async (req, res, next) => {
   const { productId, title, price, description } = req.body;
 
@@ -83,18 +128,20 @@ const postAddProductPage = async (req, res, next) => {
 const deleteProduct = async (req, res, next) => {
   try {
     const productId = req.params.productId;
-    console.log(productId);
+    console.log("productId", productId);
 
     const product = await Product.findByPk(productId);
 
-    if (product.userId !== req.userId) {
+    console.log(req.body.userId);
+
+    if (product.userId !== req.body.userId) {
       const error = new Error("Unauthorize Request");
       error.statusCode = 401;
       throw error;
     } else {
       await product.destroy();
       console.log("Product deleted");
-      deleteFile(product.imageUrl);
+      // deleteFile(product.imageUrl);
       res.status(200).json({ message: '"Product Deleted!"' });
     }
   } catch (err) {
@@ -134,4 +181,5 @@ module.exports = {
   postAddProductPage,
   deleteProduct,
   postAddProducts,
+  getAdminProducts,
 };
