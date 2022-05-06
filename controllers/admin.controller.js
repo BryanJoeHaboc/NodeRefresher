@@ -109,14 +109,15 @@ const postAddProductPage = async (req, res, next) => {
 
     // const imageUrl = image.path;
 
-    const currentUser = User.build(req.userId);
-
+    const currentUser = User.build({ _id: req.userId });
+    console.log(currentUser, req.userId);
     const product = await currentUser.createProduct({
       title: title,
       price: parseInt(price),
       imageUrl: imageUrl,
       description: description,
       name,
+      userId: req.userId,
     });
 
     res.status(201).send({ message: "Product created!", product });
@@ -133,7 +134,7 @@ const deleteProduct = async (req, res, next) => {
     const product = await Product.findByPk(productId);
 
     console.log(req.body.userId);
-
+    console.log(req.body);
     if (product.userId !== req.body.userId) {
       const error = new Error("Unauthorize Request");
       error.statusCode = 401;

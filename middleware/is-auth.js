@@ -28,6 +28,8 @@ async function checkIfAuthenticated(req, res, next) {
       error.statusCode = 401;
       throw error;
     }
+
+    req.userId = decodedToken.userId;
   } catch (err) {
     passToErrorMiddleware(err, next);
   }
