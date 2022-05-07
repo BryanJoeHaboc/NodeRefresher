@@ -100,7 +100,7 @@ app.use((error, req, res, next) => {
   if (!statusCode) {
     statusCode = 500;
   }
-
+  console.log(data);
   if (!data) {
     data = {};
   }

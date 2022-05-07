@@ -67,9 +67,16 @@ const getProductsPage = async (req, res, next) => {
   }
 };
 
-const getCartPage = async (req, res) => {
+const getCartPage = async (req, res, next) => {
   try {
-    const currentUser = User.findByPk(req.userId);
+    const currentUser = await User.findByPk(req.userId);
+
+    if (!currentUser) {
+      const error = new Error("Invalid User");
+      error.statusCode = 404;
+      throw error;
+    }
+
     const cart = await currentUser.getCart();
 
     if (!cart) {

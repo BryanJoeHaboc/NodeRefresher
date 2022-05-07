@@ -59,19 +59,28 @@ const getAdminProducts = async (req, res, next) => {
 };
 
 const postEditProduct = async (req, res, next) => {
-  const { productId, title, price, description } = req.body;
+  const { _id, title, price, description, imageUrl, name } =
+    req.body.data.product;
 
-  const image = req.file;
+  // const image = req.file;
 
   try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      const error = new Error("Invalid Input");
-      error.statusCode = 422;
+    // const errors = validationResult(req);
+    // if (!errors.isEmpty()) {
+    //   const error = new Error("Invalid Input");
+    //   error.statusCode = 422;
+
+    //   error.data = errors;
+    //   throw error;
+    // }
+
+    const product = await Product.findByPk(_id);
+
+    if (!product) {
+      const error = new Error("Product does not exists");
+      error.statusCode = 404;
       throw error;
     }
-
-    const product = await Product.findByPk(productId);
 
     if (product.userId !== req.userId) {
       const error = new Error("Unauthorize Request");
@@ -82,11 +91,15 @@ const postEditProduct = async (req, res, next) => {
     product.title = title;
     product.price = price;
     product.description = description;
+    product.imageUrl = imageUrl;
+    product.name = name;
 
-    if (image) {
-      deleteFile(product.imageUrl);
-      product.imageUrl = image.path;
-    }
+    await product.save();
+
+    // if (image) {
+    //   deleteFile(product.imageUrl);
+    //   product.imageUrl = image.path;
+    // }
     res.status(200).send({ message: "Product edited succesfully", product });
   } catch (err) {
     passToErrorMiddleware(err, next);
