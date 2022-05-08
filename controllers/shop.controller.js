@@ -1,6 +1,7 @@
 const Product = require("../models/product.model");
 const Order = require("../models/order.model");
 const User = require("../models/user.model");
+const Cart = require("../models/cart.model");
 const path = require("path");
 const fs = require("fs");
 const PDFDocument = require("pdfkit");
@@ -85,19 +86,25 @@ const getCartPage = async (req, res, next) => {
     }
 
     const products = await cart.getProducts();
-    res.send({ products });
+    res.json({ items: products });
   } catch (err) {
     passToErrorMiddleware(err, next);
   }
 };
 
-const postCart = async (req, res) => {
+const postCart = async (req, res, next) => {
   try {
-    const productId = req.body.productId;
-
+    const productId = req.body.item._id;
     let newQuantity = 1;
 
-    const currentUser = User.findByPk(req.userId);
+    const currentUser = await User.findByPk(req.userId);
+
+    if (!currentUser) {
+      const error = new Error("Invalid User");
+      error.statusCode = 404;
+      throw error;
+    }
+
     const cart = await currentUser.getCart();
 
     if (!cart) {
@@ -119,11 +126,11 @@ const postCart = async (req, res) => {
       product = await Product.findByPk(productId);
     }
 
-    await fetchedCart.addProduct(product, {
+    await cart.addProduct(product, {
       through: { quantity: newQuantity },
     });
 
-    res.send({ message: "Successfully added item to cart" });
+    res.status(201).send({ message: "Successfully added item to cart" });
   } catch (err) {
     passToErrorMiddleware(err, next);
   }
@@ -221,9 +228,15 @@ const getProductPage = async (req, res, next) => {
 
 const postCartDeleteProduct = async (req, res, next) => {
   try {
-    const prodId = req.body.productId;
+    const prodId = req.body.item._id;
 
-    const currentUser = User.findByPk(req.userId);
+    const currentUser = await User.findByPk(req.userId);
+
+    if (!currentUser) {
+      const error = new Error("User not found");
+      error.statusCode = 404;
+      throw error;
+    }
 
     const cart = await currentUser.getCart();
 
@@ -243,7 +256,7 @@ const postCartDeleteProduct = async (req, res, next) => {
 
     await product.cartItem.destroy();
 
-    res.send({ message: "Product deleted" });
+    res.status(200).json({ message: "Cart Item deleted" });
   } catch (err) {
     passToErrorMiddleware(err, next);
   }
@@ -288,29 +301,32 @@ const postOrder = async (req, res) => {
 
 const postSubtractCart = async (req, res, next) => {
   try {
-    const prodId = req.body.productId;
+    const prodId = req.body.item._id;
 
-    const currentUser = User.findByPk(req.userId);
-    let fetchedCart = [];
+    const currentUser = await User.findByPk(req.userId);
+
+    if (!currentUser) {
+      const error = new Error("User not found");
+      error.statusCode = 404;
+      throw error;
+    }
 
     const cart = await currentUser.getCart();
-    const product = cart.getProducts({ where: { _id: prodId } });
+    const product = await cart.getProducts({ where: { _id: prodId } });
 
     const cartItem = product[0].cartItem;
     let { quantity } = product[0].cartItem;
     if (quantity === 1) {
-      return product[0].cartItem.destroy();
+      await product[0].cartItem.destroy();
+      res.status(201).send({ message: "Item deleted" });
     } else {
       quantity = quantity - 1;
+      cartItem.quantity = quantity;
+      await cart.addProduct(product, {
+        through: { quantity: cartItem.quantity },
+      });
+      res.status(201).send({ message: "Item subtracted" });
     }
-    cartItem.quantity = quantity;
-    console.log(cartItem.quantity);
-
-    await fetchedCart.addProduct(product, {
-      through: { quantity: cartItem.quantity },
-    });
-
-    res.send({ message: "Item subtracted" });
   } catch (err) {
     passToErrorMiddleware(err, next);
   }

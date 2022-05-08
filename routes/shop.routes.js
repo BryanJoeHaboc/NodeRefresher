@@ -21,13 +21,13 @@ router.get("/cart", checkIfAuthenticated, getCartPage);
 
 router.post("/cart", checkIfAuthenticated, postCart);
 
+router.delete("/cart", checkIfAuthenticated, postCartDeleteProduct);
+
 router.post("/subtract-cart", checkIfAuthenticated, postSubtractCart);
 
 router.get("/products", getProductsPage);
 
 router.get("/products/:productId", getProductPage);
-
-router.post("/cart-delete-item", checkIfAuthenticated, postCartDeleteProduct);
 
 router.get("/checkout/success", checkIfAuthenticated, postOrder);
 // router.get("/checkout/cancel", checkIfAuthenticated, getCheckoutPage);
