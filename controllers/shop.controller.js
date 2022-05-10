@@ -17,6 +17,17 @@ const passToErrorMiddleware = (err, next) => {
   }
   next(err);
 };
+
+const throwAnError = (errorMessage, statusCode) => {
+  let error = {};
+  errorMessage
+    ? (error = new Error(errorMessage))
+    : (error = new Error("Server Error"));
+
+  if (statusCode) error.statusCode = statusCode;
+  throw error;
+};
+
 //----------------------------------------------------CONTROLLERS----------------------------------------------
 
 const getProductsPage = async (req, res, next) => {
@@ -136,6 +147,44 @@ const postCart = async (req, res, next) => {
   }
 };
 
+const postCheckout = async (req, res, next) => {
+  try {
+    const currentUser = await User.findByPk(req.userId);
+
+    if (!currentUser) {
+      throwAnError("User not found", 404);
+    }
+
+    console.log("currentUser", currentUser);
+
+    const cart = await currentUser.getCart();
+
+    if (!cart) {
+      throwAnError();
+    }
+
+    const products = await cart.getProducts();
+
+    if (!products.length) {
+      throwAnError("Product not found", 404);
+    }
+
+    const order = await currentUser.createOrder();
+
+    await order.addProducts(
+      products.map((product) => {
+        product.orderItem = { quantity: product.cartItem.quantity };
+        return product;
+      })
+    );
+
+    await cart.setProducts(null);
+    res.send({ message: "Order succeeded" });
+  } catch (error) {
+    passToErrorMiddleware(error, next);
+  }
+};
+
 // const getCheckoutPage = (req, res, next) => {
 //    const currentUser = User.findByPk(req.userId);
 //   let totalPrice = 0;
@@ -192,7 +241,7 @@ const postCart = async (req, res, next) => {
 // };
 
 const getOrderPage = async (req, res, next) => {
-  const currentUser = User.findByPk(req.userId);
+  const currentUser = await User.findByPk(req.userId);
 
   try {
     const orders = await currentUser.getOrders({ include: ["products"] });
@@ -343,13 +392,14 @@ const getInvoice = async (req, res, next) => {
       error.statusCode = 404;
       throw error;
     }
+
     if (order.dataValues.userId !== req.userId) {
       const error = new Error("Unauthorized");
       error.statusCode = 401;
       throw error;
     }
 
-    const products = order.getProducts();
+    const products = await order.getProducts();
 
     if (!products) {
       const error = new Error("Server Error");
@@ -401,7 +451,7 @@ module.exports = {
   getOrderPage,
   getProductPage,
   postCartDeleteProduct,
-  postOrder,
   postSubtractCart,
   getInvoice,
+  postCheckout,
 };
