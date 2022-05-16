@@ -51,29 +51,26 @@ const getProductsPage = async (req, res, next) => {
     const collections = [];
     const titles = [];
 
-    products.rows.forEach((product) => {
-      const prodTitle = product.title;
-      const index = titles.findIndex((title) => title === prodTitle);
+    // products.rows.forEach((product) => {
+    //   const prodTitle = product.title;
+    //   const index = titles.findIndex((title) => title === prodTitle);
 
-      if (index < 0) {
-        titles.push(prodTitle);
-        collections[titles.length - 1] = {
-          _id: titles.length,
-          title: prodTitle,
-          routeName: prodTitle.toLowerCase(),
-          items: [],
-        };
+    //   if (index < 0) {
+    //     titles.push(prodTitle);
+    //     collections[titles.length - 1] = {
+    //       _id: titles.length,
+    //       title: prodTitle,
+    //       routeName: prodTitle.toLowerCase(),
+    //       items: [],
+    //     };
 
-        collections[titles.length - 1].items.push(product);
-      } else {
-        collections[index].items.push(product);
-      }
-    });
+    //     collections[titles.length - 1].items.push(product);
+    //   } else {
+    //     collections[index].items.push(product);
+    //   }
+    // });
 
-    res.send({
-      collections,
-      totalItems: products.count,
-    });
+    res.send(products);
   } catch (err) {
     passToErrorMiddleware(err, next);
   }

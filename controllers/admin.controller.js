@@ -15,7 +15,7 @@ const passToErrorMiddleware = (err, next) => {
 
 const getAdminProducts = async (req, res, next) => {
   try {
-    const userId = req.params.userId;
+    const userId = req.userId;
     const products = await Product.findAndCountAll({
       where: { userId: userId },
     });
@@ -26,34 +26,30 @@ const getAdminProducts = async (req, res, next) => {
       throw error;
     }
 
-    const collections = [];
-    const titles = [];
+    // const collections = [];
+    // const titles = [];
 
-    products.rows.forEach((product) => {
-      const prodTitle = product.title;
-      const index = titles.findIndex((title) => title === prodTitle);
+    // products.rows.forEach((product) => {
+    //   const prodTitle = product.title;
+    //   const index = titles.findIndex((title) => title === prodTitle);
 
-      if (index < 0) {
-        titles.push(prodTitle);
-        collections[titles.length - 1] = {
-          _id: titles.length,
-          title: prodTitle,
-          routeName: prodTitle.toLowerCase(),
-          items: [],
-        };
+    //   if (index < 0) {
+    //     titles.push(prodTitle);
+    //     collections[titles.length - 1] = {
+    //       _id: titles.length,
+    //       title: prodTitle,
+    //       routeName: prodTitle.toLowerCase(),
+    //       items: [],
+    //     };
 
-        collections[titles.length - 1].items.push(product);
-      } else {
-        collections[index].items.push(product);
-      }
-    });
+    //     collections[titles.length - 1].items.push(product);
+    //   } else {
+    //     collections[index].items.push(product);
+    //   }
+    // });
 
-    res.send({
-      collections,
-      totalItems: products.count,
-    });
+    res.send(products);
   } catch (error) {
-    console.log("hatdogs");
     passToErrorMiddleware(error, next);
   }
 };
