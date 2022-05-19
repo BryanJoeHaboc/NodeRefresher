@@ -53,6 +53,8 @@ const fileFilter = (req, file, cb) => {
     : cb(null, false);
 };
 
+app.get("/", (req, res, next) => res.send({ message: "Hello Testing" }));
+
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(multer({ storage: fileStorage, fileFilter }).single("image"));
