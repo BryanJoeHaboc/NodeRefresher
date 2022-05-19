@@ -146,6 +146,8 @@ const postCart = async (req, res, next) => {
 
 const postCheckout = async (req, res, next) => {
   try {
+    console.log("req.body", req.body);
+    const singleProd = req.body.product;
     const currentUser = await User.findByPk(req.userId);
 
     if (!currentUser) {
@@ -168,14 +170,32 @@ const postCheckout = async (req, res, next) => {
 
     const order = await currentUser.createOrder();
 
-    await order.addProducts(
-      products.map((product) => {
-        product.orderItem = { quantity: product.cartItem.quantity };
-        return product;
-      })
-    );
+    if (singleProd) {
+      const checkOutSingleProd = products.filter(
+        (prod) => prod._id === singleProd._id
+      );
+      console.log(
+        "checkOutSingleProd",
+        checkOutSingleProd[0].dataValues.cartItem.dataValues
+      );
+      checkOutSingleProd[0].orderItem = {
+        quantity: checkOutSingleProd[0].dataValues.cartItem.dataValues.quantity,
+      };
+      await cart.setProducts(
+        products.filter((prod) => prod._id !== singleProd._id)
+      );
+      await order.addProduct(checkOutSingleProd);
+    } else {
+      await order.addProducts(
+        products.map((product) => {
+          console.log("product", product);
+          product.orderItem = { quantity: product.cartItem.quantity };
+          return product;
+        })
+      );
+      await cart.setProducts(null);
+    }
 
-    await cart.setProducts(null);
     res.send({ message: "Order succeeded" });
   } catch (error) {
     passToErrorMiddleware(error, next);
