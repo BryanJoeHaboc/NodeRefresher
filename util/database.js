@@ -5,12 +5,12 @@ const { accessSecretVersion } = require("../secretManager");
 let dbPw = "";
 let dbHost = "";
 
-async function getSecretFromGoogle() {
+function getSecretFromGoogle() {
   if (process.env.NODE_ENV === "production") {
-    dbPw = await accessSecretVersion(
+    dbPw = accessSecretVersion(
       "projects/65293551526/secrets/ECOMMERCE_DB_PW_ENV/versions/latest"
     );
-    dbHost = await accessSecretVersion(
+    dbHost = accessSecretVersion(
       "projects/65293551526/secrets/ECOMMERCE_DB_HOST_ENV/versions/latest"
     );
   } else {

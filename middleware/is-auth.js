@@ -24,7 +24,7 @@ async function checkIfAuthenticated(req, res, next) {
 
     let jwtSecret = "";
     if (process.env.NODE_ENV === "production") {
-      jwtSecret = await accessSecretVersion(
+      jwtSecret = accessSecretVersion(
         "projects/65293551526/secrets/ECOMMERCE_JWT_SECRET/versions/latest"
       );
     } else {
