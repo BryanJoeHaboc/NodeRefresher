@@ -1,4 +1,5 @@
 const jwt = require("jsonwebtoken");
+const { accessSecretVersion } = require("../secretManager");
 
 const passToErrorMiddleware = (err, next) => {
   console.log("err", err);
@@ -21,7 +22,15 @@ async function checkIfAuthenticated(req, res, next) {
     const token = authHeader.split(" ")[1];
     let decodedToken;
 
-    decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+    let jwtSecret = "";
+    if (process.env.NODE_ENV === "production") {
+      jwtSecret = await accessSecretVersion(
+        "projects/65293551526/secrets/ECOMMERCE_JWT_SECRET/versions/latest"
+      );
+    } else {
+      jwtSecret = process.env.JWT_SECRET;
+    }
+    decodedToken = jwt.verify(token, jwtSecret);
 
     if (!decodedToken) {
       const error = new Error("Not authenticated.");

@@ -1,12 +1,24 @@
 require("dotenv").config();
 const Sequelize = require("sequelize");
+const { accessSecretVersion } = require("../secretManager");
 
-let dbPw = process.env.DB_PW_DEV;
-let dbHost = process.env.DB_HOST_DEV;
+let dbPw = "";
+let dbHost = "";
 
-if (process.env.NODE_ENV === "production") {
-  dbPw = process.env.DB_PW_ENV;
+async function getSecretFromGoogle() {
+  if (process.env.NODE_ENV === "production") {
+    dbPw = await accessSecretVersion(
+      "projects/65293551526/secrets/ECOMMERCE_DB_PW_ENV/versions/latest"
+    );
+    dbHost = await accessSecretVersion(
+      "projects/65293551526/secrets/ECOMMERCE_DB_HOST_ENV/versions/latest"
+    );
+  } else {
+    dbPw = process.env.DB_PW_DEV;
+    dbHost = process.env.DB_HOST_DEV;
+  }
 }
+getSecretFromGoogle();
 
 const sequelize = new Sequelize("e-commerce", "root", dbPw, {
   dialect: "mysql",
