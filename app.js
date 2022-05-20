@@ -12,7 +12,6 @@ const Cart = require("./models/cart.model");
 const CartItem = require("./models/cart-item.model");
 const Order = require("./models/order.model");
 const OrderItem = require("./models/order-item.model");
-const configSession = require("./config/session");
 
 const { adminRoutes } = require("./routes/admin.routes");
 const shopRoutes = require("./routes/shop.routes");
@@ -63,24 +62,6 @@ app.use(
   "/public/images",
   express.static(path.join(__dirname, "public/images"))
 );
-
-// session
-configSession(app);
-
-// csrf protection - only for mvc
-// app.use(csrfProtection);
-
-// find Dummy User
-// app.use((req, res, next) => {
-//   User.findByPk(1)
-//     .then((user) => {
-//       req.user = user;
-//       console.log("is user an instance of user? ", user instanceof User);
-//       console.log("req.userrrrrrrrrrrrrrrr", req.user);
-//       next();
-//     })
-//     .catch((err) => console.log(err));
-// });
 
 Product.belongsTo(User, { constraints: true, onDelete: "CASCADE" }); // Product.getUser
 User.hasMany(Product);
