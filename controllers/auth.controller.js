@@ -8,6 +8,7 @@ const { Op } = require("sequelize");
 const { validationResult } = require("express-validator");
 const jwt = require("jsonwebtoken");
 
+const {passToErrorMiddleware} = require('./error.controller')
 const User = require("../models/user.model");
 
 const transporter = nodemailer.createTransport(
@@ -18,24 +19,7 @@ const transporter = nodemailer.createTransport(
   })
 );
 
-const getErrorMessage = (req) => {
-  const messages = req.flash("error");
-  let errorMessage = undefined;
 
-  if (messages.length > 0) {
-    errorMessage = messages[0];
-  }
-
-  return errorMessage;
-};
-
-const passToErrorMiddleware = (err, next) => {
-  console.log("err", err);
-  if (!err.statusCode) {
-    err.statusCode = 500;
-  }
-  next(err);
-};
 
 //----------------------------------------------------CONTROLLERS----------------------------------------------
 

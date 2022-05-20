@@ -1,22 +1,14 @@
 const Product = require("../models/product.model");
 const Order = require("../models/order.model");
 const User = require("../models/user.model");
-const Cart = require("../models/cart.model");
+
 const path = require("path");
 const fs = require("fs");
 const PDFDocument = require("pdfkit");
 const e = require("express");
-const stripe = require("stripe")(process.env.STRIPE_API_KEY);
+const { passToErrorMiddleware } = require("./error.controller");
 
 const ITEM_PER_PAGE = 1;
-
-const passToErrorMiddleware = (err, next) => {
-  console.log("err", err);
-  if (!err.statusCode) {
-    err.statusCode = 500;
-  }
-  next(err);
-};
 
 const throwAnError = (errorMessage, statusCode) => {
   let error = {};

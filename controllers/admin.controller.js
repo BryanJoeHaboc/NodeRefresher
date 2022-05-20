@@ -1,16 +1,9 @@
 const Product = require("../models/product.model");
 const User = require("../models/user.model");
 const { validationResult } = require("express-validator");
-
 const deleteFile = require("../util/file");
+const { passToErrorMiddleware } = require("./error.controller");
 
-const passToErrorMiddleware = (err, next) => {
-  console.log("err", err);
-  if (!err.statusCode) {
-    err.statusCode = 500;
-  }
-  next(err);
-};
 //----------------------------------------------------CONTROLLERS----------------------------------------------
 
 const getAdminProducts = async (req, res, next) => {

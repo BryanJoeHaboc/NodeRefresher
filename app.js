@@ -82,9 +82,9 @@ configSession(app);
 //     .catch((err) => console.log(err));
 // });
 
-Product.belongsTo(User, { constraints: true, onDelete: "CASCADE" });
+Product.belongsTo(User, { constraints: true, onDelete: "CASCADE" }); // Product.getUser
 User.hasMany(Product);
-User.hasOne(Cart);
+User.hasOne(Cart); // User.getCart(), User.setCart(), User.createCart()
 Cart.belongsTo(User);
 Cart.belongsToMany(Product, { through: { model: CartItem, unique: false } });
 Product.belongsToMany(Cart, { through: { model: CartItem, unique: false } });
