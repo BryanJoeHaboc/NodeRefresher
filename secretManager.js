@@ -8,7 +8,7 @@ const client = new SecretManagerServiceClient();
 async function accessSecretVersion(name) {
   try {
     const [version] = await client.accessSecretVersion({
-      name: name,
+      name,
     });
 
     // Extract the payload as a string.
