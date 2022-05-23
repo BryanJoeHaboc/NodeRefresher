@@ -1,1 +1,4 @@
 runtime: nodejs16
+
+beta_settings:
+  cloud_sql_instances: ecommerce-app-350710:us-central1:ecommerce-db

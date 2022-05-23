@@ -24,9 +24,10 @@ async function checkIfAuthenticated(req, res, next) {
 
     let jwtSecret = "";
     if (process.env.NODE_ENV === "production") {
-      jwtSecret = accessSecretVersion(
-        "projects/65293551526/secrets/ECOMMERCE_JWT_SECRET/versions/latest"
-      );
+      // jwtSecret = await accessSecretVersion(
+      //   "projects/65293551526/secrets/ECOMMERCE_JWT_SECRET/versions/latest"
+      // );
+      jwtSecret = process.env.JWT_SECRET_PROD;
     } else {
       jwtSecret = process.env.JWT_SECRET;
     }
