@@ -8,7 +8,7 @@ steps:
   - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
     entrypoint: 'gcloud'
     args:
-    - "config set app/cloud_build_timeout 1600 && gcloud app deploy"
+    - "gcloud config set app/cloud_build_timeout 1600 && gcloud app deploy"
     # args: [
     #     "-c",
     #     "PROJECT_ID=ecommerce-app-350710",
