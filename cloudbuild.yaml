@@ -3,7 +3,7 @@ steps:
     entrypoint: "bash"
     args:
       - "-c"
-      - "PROJECT_ID=ecommerce-app-350710"
+      - PROJECT_ID=ecommerce-app-350710
       - |
         PROJECT_NUMBER=$(gcloud projects list \
         --format="value(projectNumber)" \
@@ -14,7 +14,7 @@ steps:
         --member=serviceAccount:${PROJECT_NUMBER}@cloudbuild.gserviceaccount.com \
         --role=roles/iam.serviceAccountUser \
         --project=${PROJECT_ID}
-      - "gcloud config set app/cloud_build_timeout 1600 && gcloud app deploy"
+      - gcloud config set app/cloud_build_timeout 1600 && gcloud app deploy
 
     secretEnv: ["DB_PW_PROD", "INSTANCE_CONNECTION_NAME", "JWT_SECRET_PROD"]
 
