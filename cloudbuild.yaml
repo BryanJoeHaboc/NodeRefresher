@@ -1,12 +1,10 @@
 steps:
   - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
-    args: ['PROJECT_ID=ecommerce-app-350710','PROJECT_NUMBER=$(gcloud projects list 
-         --format="value(projectNumber)" 
-         --filter="projectId=${PROJECT_ID}")','gcloud', 'iam', 'service-accounts', 'add-iam-policy-binding', 
-      '${PROJECT_ID}@appspot.gserviceaccount.com', 
-      '--member=serviceAccount:${PROJECT_NUMBER}@cloudbuild.gserviceaccount.com', 
+    args: ['gcloud', 'iam', 'service-accounts', 'add-iam-policy-binding', 
+      'ecommerce-app-350710@appspot.gserviceaccount.com', 
+      '--member=serviceAccount:65293551526@cloudbuild.gserviceaccount.com', 
       '--role=roles/iam.serviceAccountUser', 
-      '--project=${PROJECT_ID}']
+      '--project=ecommerce-app-350710']
   - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
     args: ['gcloud', 'config', 'set', 'app/cloud_build_timeout', '1600', '&&', 'gcloud', 'app', 'deploy']
          
