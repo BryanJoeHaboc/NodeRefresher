@@ -1,11 +1,8 @@
 steps:
   - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
     entrypoint: 'bash'
-    args: ['-c','gcloud', 'iam', 'service-accounts', 'add-iam-policy-binding', 
-      'ecommerce-app-350710@appspot.gserviceaccount.com', 
-      '--member=serviceAccount:65293551526@cloudbuild.gserviceaccount.com', 
-      '--role=roles/iam.serviceAccountUser', 
-      '--project=ecommerce-app-350710', "gcloud config set app/cloud_build_timeout 1600 && gcloud app deploy",]
+    args: ['-c','gcloud iam service-accounts add-iam-policy-binding 
+      ecommerce-app-350710@appspot.gserviceaccount.com --member=serviceAccount:65293551526@cloudbuild.gserviceaccount.com --role=roles/iam.serviceAccountUser --project=ecommerce-app-350710', 'gcloud config set app/cloud_build_timeout 1600 && gcloud app deploy',]
     # args: [
     #     "-c",
     #     "PROJECT_ID=ecommerce-app-350710",
