@@ -3,11 +3,11 @@ steps:
     entrypoint: "bash"
     args:
     - "-c"
-    - |
+    - |-
       PROJECT_NUMBER=$(gcloud projects list \
       --format="value(projectNumber)" \
       --filter="projectId=ecommerce-app-350710")
-    - |
+    - |-
       gcloud iam service-accounts add-iam-policy-binding \
       ecommerce-app-350710@appspot.gserviceaccount.com \
       --member=serviceAccount:${PROJECT_NUMBER}@cloudbuild.gserviceaccount.com \
