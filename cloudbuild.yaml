@@ -1,13 +1,13 @@
 steps:
-  - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
+  - name: "gcr.io/google.com/cloudsdktool/cloud"
     args: 
-    - |-
+    - |
       PROJECT_NUMBER=$(gcloud projects list \
         --format="value(projectNumber)" \
         --filter="projectId=${PROJECT_ID}")
   - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
     args:
-    - |-
+    - |
       gcloud iam service-accounts add-iam-policy-binding \
         ${PROJECT_ID}@appspot.gserviceaccount.com \
         --member=serviceAccount:${PROJECT_NUMBER}@cloudbuild.gserviceaccount.com \
