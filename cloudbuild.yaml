@@ -1,7 +1,7 @@
 steps:
   - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
     args: ['gcloud', 'iam', 'service-accounts', 'add-iam-policy-binding', 
-      'ecommerce-app-350710@appspot.gserviceaccount.com', 
+      "'ecommerce-app-350710@appspot.gserviceaccount.com'", 
       '--member=serviceAccount:65293551526@cloudbuild.gserviceaccount.com', 
       '--role=roles/iam.serviceAccountUser', 
       '--project=ecommerce-app-350710']
