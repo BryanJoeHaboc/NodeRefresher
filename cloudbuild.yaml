@@ -2,7 +2,7 @@ steps:
   - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
     entrypoint: 'bash'
     args:
-    - 'c' 
+    - '-c' 
     - |-
       PROJECT_NUMBER=$(gcloud projects list \
         --format="value(projectNumber)" \
