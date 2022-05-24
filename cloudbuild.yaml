@@ -1,6 +1,6 @@
 steps:
   - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
-    args: [PROJECT_NUMBER=$(gcloud, projects, list, --format="value(projectNumber)", --filter="projectId=ecommerce-app-350710"), gcloud, iam, service-accounts, add-iam-policy-binding, 'ecommerce-app-350710@appspot.gserviceaccount.com', '--member=serviceAccount:${PROJECT_NUMBER}@cloudbuild.gserviceaccount.com',  --role=roles/iam.serviceAccountUser, '--project=ecommerce-app-350710' ]
+    args: [PROJECT_NUMBER=$(gcloud projects list --format="value(projectNumber)", --filter="projectId=ecommerce-app-350710"), gcloud, iam, service-accounts, add-iam-policy-binding, 'ecommerce-app-350710@appspot.gserviceaccount.com', '--member=serviceAccount:${PROJECT_NUMBER}@cloudbuild.gserviceaccount.com',  --role=roles/iam.serviceAccountUser, '--project=ecommerce-app-350710' ]
     # - |-
     #   PROJECT_NUMBER=$(gcloud projects list \
     #     --format="value(projectNumber)" \
