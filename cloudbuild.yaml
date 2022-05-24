@@ -6,7 +6,6 @@ steps:
       '--role=roles/iam.serviceAccountUser', 
       '--project=ecommerce-app-350710']
   - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
-    entrypoint: 'gcloud'
     args:
     - "gcloud config set app/cloud_build_timeout 1600 && gcloud app deploy"
     # args: [
