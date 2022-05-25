@@ -5,8 +5,7 @@ steps:
     - '-c'
     - |
       gcloud iam service-accounts add-iam-policy-binding \n 
-      ecommerce-app-350710@appspot.gserviceaccount.com --member=serviceAccount:65293551526@cloudbuild.gserviceaccount.com \n
-      --role=roles/iam.serviceAccountUser --project=ecommerce-app-350710
+      ecommerce-app-350710@appspot.gserviceaccount.com --member=serviceAccount:65293551526@cloudbuild.gserviceaccount.com --role=roles/iam.serviceAccountUser --project=ecommerce-app-350710
       echo $'\n  DB_PW_PROD: '$$DB_PW_PROD >> app.yaml
       echo $'\n  INSTANCE_CONNECTION_NAME: '$$INSTANCE_CONNECTION_NAME >> app.yaml
       echo $'\n  JWT_SECRET_PROD: '$$JWT_SECRET_PROD >> app.yaml
