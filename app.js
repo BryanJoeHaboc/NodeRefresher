@@ -17,7 +17,7 @@ const { adminRoutes } = require("./routes/admin.routes");
 const shopRoutes = require("./routes/shop.routes");
 const authRoutes = require("./routes/auth.routes");
 
-const port = process.env.PORT;
+const port = process.env.PORT || 5000;
 const app = express();
 
 app.use((req, res, next) => {

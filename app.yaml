@@ -4,4 +4,3 @@ beta_settings:
   cloud_sql_instances:
 
 env_variables:
-  PORT: 5000
