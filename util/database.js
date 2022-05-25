@@ -35,7 +35,7 @@ async function getSecretFromGoogle() {
 getSecretFromGoogle();
 
 const sequelize = new Sequelize(mysqlConfig);
-
+console.log(sequelize);
 sequelize
   .authenticate()
   .then((res) => console.log("Connection has been established successfully."))
