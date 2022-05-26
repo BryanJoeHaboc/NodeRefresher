@@ -20,6 +20,8 @@ const authRoutes = require("./routes/auth.routes");
 const port = process.env.PORT || 5000;
 const app = express();
 
+console.log("jwtsecret", process.env.JWT_SECRET_PROD);
+
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader(

@@ -12,7 +12,6 @@ const passToErrorMiddleware = (err, next) => {
 async function checkIfAuthenticated(req, res, next) {
   try {
     const authHeader = req.get("Authorization");
-    console.log(req.body);
     if (!authHeader) {
       const error = new Error("Not authenticated");
       error.statusCode = 401;
@@ -28,7 +27,6 @@ async function checkIfAuthenticated(req, res, next) {
       //   "projects/65293551526/secrets/ECOMMERCE_JWT_SECRET/versions/latest"
       // );
       jwtSecret = process.env.JWT_SECRET_PROD;
-      console.log("jwtsecret", process.env.JWT_SECRET_PROD);
     } else {
       jwtSecret = process.env.JWT_SECRET;
     }
