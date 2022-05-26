@@ -23,7 +23,6 @@ const transporter = nodemailer.createTransport(
 
 const postLogin = async (req, res, next) => {
   const { email, password } = req.body;
-  console.log("jwtsecret", process.env.JWT_SECRET_PROD);
   try {
     const errors = validationResult(req);
 
@@ -58,7 +57,7 @@ const postLogin = async (req, res, next) => {
     } else {
       jwtSecret = process.env.JWT_SECRET;
     }
-    console.log(jwtSecret, jwtSecret);
+    console.log("jwtSecret", jwtSecret);
 
     const token = jwt.sign(
       {
