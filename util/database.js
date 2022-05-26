@@ -14,6 +14,7 @@ const mysqlConfig = {
 
 async function getSecretFromGoogle() {
   if (process.env.NODE_ENV === "production") {
+    console.log("jwtsecret prodc", process.env.JWT_SECRET_PROD);
     console.log("pumasok sa production");
     mysqlConfig.password = process.env.DB_PW_PROD;
     mysqlConfig.dialectOptions = {
