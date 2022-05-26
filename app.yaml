@@ -1,6 +1,5 @@
 runtime: nodejs16
 service: ecommerce-backend
-version: 1
 beta_settings:
   cloud_sql_instances:
 
