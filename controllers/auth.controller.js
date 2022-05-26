@@ -53,12 +53,10 @@ const postLogin = async (req, res, next) => {
     }
     let jwtSecret = "";
     if (process.env.NODE_ENV === "production") {
-      console.log("process.env");
       jwtSecret = process.env.JWT_SECRET_PROD;
     } else {
       jwtSecret = process.env.JWT_SECRET;
     }
-    console.log("jwtSecret", jwtSecret);
 
     const token = jwt.sign(
       {
