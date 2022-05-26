@@ -58,6 +58,7 @@ const postLogin = async (req, res, next) => {
     } else {
       jwtSecret = process.env.JWT_SECRET;
     }
+    console.log(jwtSecret, jwtSecret);
 
     const token = jwt.sign(
       {
