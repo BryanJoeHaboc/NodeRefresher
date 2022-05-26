@@ -85,8 +85,6 @@ const postLogin = async (req, res, next) => {
 const postSignUp = async (req, res, next) => {
   const { firstName, lastName, email, password, confirmPassword, userType } =
     req.body;
-
-  console.log(req.body);
   try {
     if (confirmPassword !== password) {
       const error = new Error("Password and confirm password must be equal");
