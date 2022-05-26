@@ -20,8 +20,6 @@ const authRoutes = require("./routes/auth.routes");
 const port = process.env.PORT || 5000;
 const app = express();
 
-console.log("jwtsecret", process.env.JWT_SECRET_PROD);
-
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader(
@@ -34,6 +32,8 @@ app.use((req, res, next) => {
   }
   next();
 });
+
+console.log("jwtsecret", process.env.JWT_SECRET_PROD);
 
 const fileStorage = multer.diskStorage({
   destination: (req, file, cb) => {
