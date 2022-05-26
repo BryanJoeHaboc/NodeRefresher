@@ -33,8 +33,6 @@ app.use((req, res, next) => {
   next();
 });
 
-console.log("jwtsecret", process.env.JWT_SECRET_PROD);
-
 const fileStorage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, "public/images");

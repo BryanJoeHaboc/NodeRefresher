@@ -8,7 +8,7 @@ const { Op } = require("sequelize");
 const { validationResult } = require("express-validator");
 const jwt = require("jsonwebtoken");
 
-const {passToErrorMiddleware} = require('./error.controller')
+const { passToErrorMiddleware } = require("./error.controller");
 const User = require("../models/user.model");
 
 const transporter = nodemailer.createTransport(
@@ -19,13 +19,11 @@ const transporter = nodemailer.createTransport(
   })
 );
 
-
-
 //----------------------------------------------------CONTROLLERS----------------------------------------------
 
 const postLogin = async (req, res, next) => {
   const { email, password } = req.body;
-
+  console.log("jwtsecret", process.env.JWT_SECRET_PROD);
   try {
     const errors = validationResult(req);
 
@@ -54,12 +52,19 @@ const postLogin = async (req, res, next) => {
       error.statusCode = 422;
       throw error;
     }
+    let jwtSecret = "";
+    if (process.env.NODE_ENV === "production") {
+      jwtSecret = process.env.JWT_SECRET_PROD;
+    } else {
+      jwtSecret = process.env.JWT_SECRET;
+    }
+
     const token = jwt.sign(
       {
         email: user.email,
         userId: user._id,
       },
-      process.env.JWT_SECRET,
+      jwtSecret,
       { expiresIn: "1h" }
     );
     res.send({
