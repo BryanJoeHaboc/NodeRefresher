@@ -153,28 +153,25 @@ const deleteProduct = async (req, res, next) => {
 };
 
 const postAddProducts = async (req, res, next) => {
-  const data = req.body.data;
-  const excelHeaders = data.shift();
-  const products = [];
-
-  for (let i = 0; i < data.length; i++) {
-    const productObj = {};
-
-    for (let j = 0; j < data[i].length; j++) {
-      productObj[excelHeaders[j]] = data[i][j];
-    }
-    productObj.userId = req.body.userId;
-
-    productObj.description =
-      "Amet Lorem ad ipsum enim nulla occaecat nulla adipisicing do cupidatat elit deserunt officia.";
-    products.push(productObj);
-  }
-  console.log(products);
   try {
+    const data = req.body.data;
+    const excelHeaders = data.shift();
+    const products = [];
+
+    for (let i = 0; i < data.length; i++) {
+      const productObj = {};
+
+      for (let j = 0; j < data[i].length; j++) {
+        productObj[excelHeaders[j]] = data[i][j];
+      }
+      productObj.userId = req.body.userId;
+      products.push(productObj);
+    }
+
     await Product.bulkCreate(products);
 
     res.send({ message: "All products added" });
-  } catch (e) {
+  } catch (err) {
     passToErrorMiddleware(err, next);
   }
 };

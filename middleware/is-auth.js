@@ -1,5 +1,4 @@
 const jwt = require("jsonwebtoken");
-const { accessSecretVersion } = require("../secretManager");
 
 const passToErrorMiddleware = (err, next) => {
   console.log("err", err);

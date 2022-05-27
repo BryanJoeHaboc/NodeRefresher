@@ -1,9 +1,5 @@
 require("dotenv").config();
 const Sequelize = require("sequelize");
-const { accessSecretVersion } = require("../secretManager");
-
-let dbPw = "";
-let dbHost = "";
 
 const mysqlConfig = {
   database: "e-commerce",
