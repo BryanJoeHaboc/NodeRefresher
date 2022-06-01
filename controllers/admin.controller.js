@@ -168,9 +168,9 @@ const postAddProducts = async (req, res, next) => {
       products.push(productObj);
     }
 
-    await Product.bulkCreate(products);
+    const productsWithId = await Product.bulkCreate(products);
 
-    res.send({ message: "All products added" });
+    res.send({ message: "All products added", products: productsWithId });
   } catch (err) {
     passToErrorMiddleware(err, next);
   }
