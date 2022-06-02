@@ -33,35 +33,35 @@ app.use((req, res, next) => {
   next();
 });
 
-const fileStorage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "public/images");
-  },
-  filename: (req, file, cb) => {
-    const fileName =
-      new Date().toISOString().split(":").join("-") + file.originalname;
-    cb(null, fileName);
-  },
-});
+// const fileStorage = multer.diskStorage({
+//   destination: (req, file, cb) => {
+//     cb(null, "public/images");
+//   },
+//   filename: (req, file, cb) => {
+//     const fileName =
+//       new Date().toISOString().split(":").join("-") + file.originalname;
+//     cb(null, fileName);
+//   },
+// });
 
-const fileFilter = (req, file, cb) => {
-  file.mimetype === "image/png" ||
-  file.mimetype === "image/jpg" ||
-  file.mimetype === "image/jpeg"
-    ? cb(null, true)
-    : cb(null, false);
-};
+// const fileFilter = (req, file, cb) => {
+//   file.mimetype === "image/png" ||
+//   file.mimetype === "image/jpg" ||
+//   file.mimetype === "image/jpeg"
+//     ? cb(null, true)
+//     : cb(null, false);
+// };
 
 app.get("/", (req, res, next) => res.send({ message: "Hello Testing" }));
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
-app.use(multer({ storage: fileStorage, fileFilter }).single("image"));
-app.use(express.static(path.join(__dirname, "public")));
-app.use(
-  "/public/images",
-  express.static(path.join(__dirname, "public/images"))
-);
+// app.use(multer({ storage: fileStorage, fileFilter }).single("image"));
+// app.use(express.static(path.join(__dirname, "public")));
+// app.use(
+//   "/public/images",
+//   express.static(path.join(__dirname, "public/images"))
+// );
 
 Product.belongsTo(User, { constraints: true, onDelete: "CASCADE" }); // Product.getUser
 User.hasMany(Product);
